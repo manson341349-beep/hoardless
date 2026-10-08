@@ -76,9 +76,34 @@ private struct CategoryDetail: View {
                 }
             }
             .scrollContentBackground(.hidden)
-            Text(t.readOnlyNotice).font(.caption).foregroundStyle(Theme.dim)
+            ActionBanner(t: t)
         }
         .padding(24)
+        .confirmationDialog(dialogTitle, isPresented: Binding(get: { model.pending != nil }, set: { if !$0 { model.pending = nil } }),
+                            titleVisibility: .visible, presenting: model.pending) { action in
+            switch action {
+            case .trash: Button(t.trashButton, role: .destructive) { model.confirmPending() }
+            case .move: Button(t.chooseFolder) { model.confirmPending() }
+            }
+            Button(t.cancel, role: .cancel) { model.pending = nil }
+        } message: { action in
+            let explain = action.result.rule.explain.text(chinese: t.chinese)
+            switch action {
+            case .trash(let loc, _): Text(t.confirmTrashBody(path: loc.url.path, explain: explain))
+            case .move(let loc, _, let dest):
+                Text(t.confirmMoveBody(path: loc.url.path, destination: (model.plannedTarget(action) ?? dest).path, explain: explain))
+            }
+        }
+    }
+
+    private var dialogTitle: String {
+        guard let action = model.pending else { return "" }
+        let name = action.result.rule.title.text(chinese: t.chinese)
+        let size = Bytes.text(action.result.states[action.location.id]?.bytes ?? 0)
+        switch action {
+        case .trash: return t.confirmTrashTitle(name, size)
+        case .move: return t.confirmMoveTitle(name, size)
+        }
     }
 }
 
@@ -114,7 +139,7 @@ private struct RuleRow: View {
                     Text(result.rule.explain.text(chinese: t.chinese))
                         .foregroundStyle(Theme.paper.opacity(0.85))
                         .fixedSize(horizontal: false, vertical: true)
-                    ForEach(result.locations) { LocationRow(location: $0, ruleID: result.id, state: result.states[$0.id] ?? .notScanned, t: t) }
+                    ForEach(result.locations) { LocationRow(location: $0, result: result, state: result.states[$0.id] ?? .notScanned, t: t) }
                     ForEach(result.rejected, id: \.self) { r in
                         Text("\(r.display) — \(t.notUsed): \(r.reason)").font(.caption).foregroundStyle(Theme.dim)
                     }
@@ -133,9 +158,10 @@ private struct RuleRow: View {
 private struct LocationRow: View {
     @EnvironmentObject private var model: AppModel
     let location: Location
-    let ruleID: String
+    let result: RuleResult
     let state: LocationState
     let t: Strings
+    private var ruleID: String { result.id }
 
     var body: some View {
         HStack(spacing: 8) {
@@ -148,10 +174,50 @@ private struct LocationRow: View {
                 Button(t.checkHere) { Task { await model.measure(location, ruleID: ruleID) } }.help(t.permissionHelp)
             case .measured:
                 Button(t.reveal) { model.reveal(location) }
+                if model.working == location.id {
+                    ProgressView().controlSize(.small)
+                    Text(t.working).font(.caption).foregroundStyle(Theme.dim)
+                } else if model.canAct(location, in: result) {
+                    Button(t.moveButton) { model.askMove(location, in: result) }
+                    Button(t.trashButton, role: .destructive) { model.askTrash(location, in: result) }
+                }
             default:
                 EmptyView()
             }
         }
+    }
+}
+
+/// Bottom note after an action, with Undo; or an error.
+private struct ActionBanner: View {
+    @EnvironmentObject private var model: AppModel
+    let t: Strings
+
+    var body: some View {
+        if let error = model.actionError {
+            note(error, color: Color(hex: 0xff6b5e)) { Button(t.gotIt) { model.actionError = nil } }
+        } else if let record = model.lastRecord {
+            let size = Bytes.text(record.bytes)
+            let name = model.results.first(where: { $0.id == record.ruleID })?.rule.title.text(chinese: t.chinese) ?? record.title
+            let text = record.kind == .trashed
+                ? t.trashed(name, size)
+                : t.moved(name, size, record.now.deletingLastPathComponent().path)
+            note(text, color: Theme.paper) {
+                Button(t.undo) { model.undoLast() }.disabled(model.working != nil)
+                Button(t.gotIt) { model.dismissRecord() }
+            }
+        }
+    }
+
+    private func note(_ text: String, color: Color, @ViewBuilder buttons: () -> some View) -> some View {
+        HStack(spacing: 10) {
+            Text(text).foregroundStyle(color).lineLimit(2)
+            Spacer()
+            buttons()
+        }
+        .padding(12)
+        .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
+        .overlay(RoundedRectangle(cornerRadius: 12, style: .continuous).strokeBorder(.white.opacity(0.14)))
     }
 }
 

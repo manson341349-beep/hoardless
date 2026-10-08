@@ -215,6 +215,7 @@ private struct ScanOrb: View {
         }
         .buttonStyle(OrbPress())
         .keyboardShortcut(.defaultAction)
+        .disabled(model.working != nil && model.phase != .scanning)
     }
 }
 

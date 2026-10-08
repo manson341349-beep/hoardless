@@ -39,6 +39,7 @@ final class AppModel: ObservableObject {
             scanTask?.cancel()
             return
         }
+        guard working == nil else { return }  // never rescan while a file is being moved
         scanTask = Task { await scan() }
     }
 
@@ -90,6 +91,111 @@ final class AppModel: ObservableObject {
     private func update(_ ruleID: String, _ locationID: String, _ state: LocationState) {
         guard let i = results.firstIndex(where: { $0.id == ruleID }) else { return }
         results[i].states[locationID] = state
+    }
+
+    // MARK: trash and move (the only actions that change files; all go through FileActions)
+
+    enum PendingAction: Identifiable {
+        case trash(Location, RuleResult)
+        case move(Location, RuleResult, URL)
+
+        var id: String {
+            switch self {
+            case .trash(let loc, _): return "trash:" + loc.id
+            case .move(let loc, _, let dest): return "move:" + loc.id + "->" + dest.path
+            }
+        }
+        var location: Location {
+            switch self {
+            case .trash(let loc, _), .move(let loc, _, _): return loc
+            }
+        }
+        var result: RuleResult {
+            switch self {
+            case .trash(_, let r), .move(_, let r, _): return r
+            }
+        }
+    }
+
+    @Published var pending: PendingAction?
+    @Published private(set) var working: String?
+    @Published private(set) var lastRecord: ActionRecord?
+    @Published var actionError: String?
+    private let actions = FileActions()
+
+    func canAct(_ location: Location, in result: RuleResult) -> Bool {
+        phase != .scanning && working == nil && actions.canAct(location, in: result)
+    }
+
+    func askTrash(_ location: Location, in result: RuleResult) {
+        pending = .trash(location, result)
+    }
+
+    func askMove(_ location: Location, in result: RuleResult) {
+        let panel = NSOpenPanel()
+        panel.canChooseDirectories = true
+        panel.canChooseFiles = false
+        panel.canCreateDirectories = true
+        panel.allowsMultipleSelection = false
+        panel.prompt = Strings(chinese: chinese).chooseFolder
+        panel.message = Strings(chinese: chinese).chooseFolderMessage
+        guard panel.runModal() == .OK, let folder = panel.url else { return }
+        pending = .move(location, result, folder)
+    }
+
+    func confirmPending() {
+        guard let action = pending else { return }
+        pending = nil
+        guard working == nil, phase != .scanning else { return }
+        // Act on the latest scan of this rule, never on the copy captured when the dialog opened.
+        guard let current = results.first(where: { $0.id == action.result.id }) else { return }
+        working = action.location.id
+        actionError = nil
+        let actions = self.actions
+        Task {
+            let outcome: Result<ActionRecord, Error> = await Task.detached(priority: .userInitiated) {
+                switch action {
+                case .trash(let loc, _): return Result { try actions.trash(loc, of: current) }
+                case .move(let loc, _, let dest): return Result { try actions.move(loc, of: current, to: dest) }
+                }
+            }.value
+            working = nil
+            switch outcome {
+            case .success(let record):
+                update(record.ruleID, record.locationID, .missing)
+                lastRecord = record
+            case .failure(let error):
+                actionError = Strings(chinese: chinese).actionFailed(error)
+            }
+        }
+    }
+
+    func undoLast() {
+        guard working == nil, phase != .scanning, let record = lastRecord else { return }
+        working = record.locationID
+        actionError = nil
+        let actions = self.actions
+        Task {
+            let outcome = await Task.detached { Result { try actions.undo(record) } }.value
+            working = nil
+            switch outcome {
+            case .success:
+                if lastRecord?.id == record.id { lastRecord = nil }
+                if let r = results.first(where: { $0.id == record.ruleID }), let loc = r.locations.first(where: { $0.id == record.locationID }) {
+                    await measure(loc, ruleID: r.id)
+                }
+            case .failure(let error):
+                actionError = Strings(chinese: chinese).actionFailed(error)
+            }
+        }
+    }
+
+    func dismissRecord() { lastRecord = nil }
+
+    /// The exact folder a move would land in, for the confirmation dialog.
+    func plannedTarget(_ action: PendingAction) -> URL? {
+        guard case .move(let loc, let result, let folder) = action else { return nil }
+        return actions.plannedTarget(for: loc, of: result, in: folder)
     }
 
     func reveal(_ location: Location) {

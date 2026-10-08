@@ -8,6 +8,8 @@ public struct Usage: Sendable, Hashable {
     public var symlinks: Int = 0
     /// Items macOS would not let us read.
     public var unreadable: Int = 0
+    /// Volume and file number of the measured folder itself, so an action can tell if it was replaced later.
+    public var identity: [UInt64]?
 }
 
 public enum LocationState: Sendable, Hashable {
@@ -35,6 +37,7 @@ public enum Scanner {
         guard let top = try? url.resourceValues(forKeys: Set(keys + [.isDirectoryKey])) else { return .missing }
         if top.isSymbolicLink == true { return .failed("is a symlink") }  // PathPolicy resolves links first
         var usage = Usage()
+        usage.identity = FileActions.identity(url.path)
         var seen = Set<AnyHashable>()
 
         func add(_ values: URLResourceValues) {
