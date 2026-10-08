@@ -13,6 +13,18 @@
   "paths": [
     "~/.lmstudio/models"
   ],
+  "app_settings": [
+    {
+      "file": "~/.lmstudio/settings.json",
+      "format": "json",
+      "key": "downloadsFolder"
+    },
+    {
+      "file": "~/.lmstudio-home-pointer",
+      "format": "pointer",
+      "subpath": "models"
+    }
+  ],
   "safety": "protected",
   "status": "verified",
   "evidence": [
@@ -27,5 +39,5 @@
       "checked": "2026-10-08"
     }
   ],
-  "notes": "The folder can be changed in My Models (downloadsFolder in ~/.lmstudio/settings.json) and the whole home moved via ~/.lmstudio-home-pointer; needs a resolver. Never target ~/.lmstudio: it holds credentials and conversations. No official env var found."
+  "notes": "The folder can be changed in My Models (downloadsFolder in ~/.lmstudio/settings.json) and the whole home moved via ~/.lmstudio-home-pointer; both read via app_settings (observed locally). Never target ~/.lmstudio: it holds credentials and conversations. No official env var found."
 }

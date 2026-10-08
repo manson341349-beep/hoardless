@@ -45,6 +45,7 @@ Hoardless 只认识 `rules/apps/` 里列出的文件夹。每个文件描述一�
 | `title`, `explain` | Shown to users, English + Chinese. `explain` must say what is lost if removed | 给用户看的中英文；`explain` 必须写清删掉会失去什么 |
 | `paths` | Exact folders or files, starting with `~/`. No `..`, `//` or wildcards | 精确路径，以 `~/` 开头，不能有 `..`、`//` 和通配符 |
 | `env_overrides` | Variables that move the data, highest precedence first. `subpath` is added to the variable's value (e.g. `HF_HOME` + `hub`). The rule's own `paths` are still scanned when they exist | 能改变存放位置的环境变量，按优先级从高到低排；`subpath` 接在变量值后面。规则自己的 `paths` 只要存在也照样扫描 |
+| `app_settings` | Settings files where the app records a folder the user chose: `file` (`~/…`), `format` (`ini` with key `Section.key`, `json` with a top-level key holding a path or a list, `sqlite` with `table.column`, or `pointer` for a file that is just a path), optional `subpath` | 应用记录"用户自选位置"的设置文件：`file`、`format`（ini 用 `段.键`，json 用顶层键，sqlite 用 `表.列`，pointer 表示整个文件就是一个路径）、可选 `subpath` |
 | `safety` | see below | 见下 |
 | `official_cleanup` | The app's own cleanup command: a known tool (conda, uv, pip, hf, ollama…) followed by plain words, flags or `<placeholders>`. A new tool is added to `KNOWN_TOOLS` in the validator during review | 应用自带的清理命令：以已知工具开头（conda、uv、pip、hf、ollama 等），后面只能是普通词、参数或 `<占位符>`；新工具在审核时加进校验脚本的 `KNOWN_TOOLS` |
 | `command_only` | `true` = Hoardless never removes these files itself, it only shows `official_cleanup` | 设为 `true` 时 Hoardless 不自己动文件，只展示官方清理命令 |
@@ -93,14 +94,15 @@ iCloud 云盘、Dropbox、照片图库等）、`~/.ollama` `~/.cache/huggingface
 
 ## Known limits / 已知局限
 
-Fixed paths only cover default locations. These apps let users move their data, and Hoardless will need a small
-per-app resolver in code to follow them (each rule's `notes` says where the real setting lives):
+Locations the user moved are found through `app_settings` for Ollama, LM Studio, ComfyUI Desktop, 剪映, CapCut drafts
+and pip. They are shown read-only: Hoardless only trashes or moves a rule's own default path. Still not followed:
 
-固定路径只覆盖默认位置。下面这些应用允许用户改存放位置，以后需要在代码里为它们各写一个小"解析器"去读真实设置（具体位置写在各规则的 `notes` 里）：
+用户改过的位置，Ollama、LM Studio、ComfyUI Desktop、剪映、CapCut 草稿和 pip 已经能通过 `app_settings` 找到，但只显示不操作
+（Hoardless 只对规则自己的默认路径提供移动和删除）。仍然跟不到的：
 
-- Ollama (app setting in `db.sqlite`), LM Studio (`settings.json`), ComfyUI (Comfy Desktop `settings.json` modelsDirs /
-  `extra_model_paths.yaml`), Draw Things (External Folder), 剪映 (`globalSetting`), Docker Desktop (Disk image location),
-  pip (`pip.conf` cache-dir).
+- Draw Things (External Folder is stored inside its sandbox), Docker Desktop (disk image location is in a Group Container),
+  ComfyUI manual git installs (`extra_model_paths.yaml` inside the repo), CapCut cache (its settings file has no cache key).
+  Draw Things 的外部文件夹、Docker 的磁盘位置（都在沙盒里）、手动安装的 ComfyUI、CapCut 缓存（设置文件里没有这个键）。
 - DaVinci Resolve has no fixed cache path at all (it follows each project's Working Folders setting), so it has no rule yet.
   DaVinci Resolve 的缓存位置跟着每个项目的设置走，没有固定路径，所以暂时没有规则。
 - conda's main package cache usually sits outside the home folder (e.g. `/opt/anaconda3/pkgs`), which rules cannot point to.

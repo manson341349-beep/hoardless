@@ -4,18 +4,38 @@
   "description": "Where one app keeps one kind of large data on macOS, and how careful Hoardless must be with it.",
   "type": "object",
   "additionalProperties": false,
-  "required": ["id", "app", "category", "title", "explain", "paths", "safety", "status", "evidence"],
+  "required": [
+    "id",
+    "app",
+    "category",
+    "title",
+    "explain",
+    "paths",
+    "safety",
+    "status",
+    "evidence"
+  ],
   "properties": {
     "id": {
       "type": "string",
       "pattern": "^[a-z0-9]+(-[a-z0-9]+)*$",
       "description": "Unique, kebab-case, equal to the file name without .json."
     },
-    "app": { "type": "string", "pattern": "\\S" },
-    "category": {
-      "enum": ["ai-models", "package-cache", "video-editors", "dev-tools"]
+    "app": {
+      "type": "string",
+      "pattern": "\\S"
     },
-    "title": { "$ref": "#/$defs/i18n" },
+    "category": {
+      "enum": [
+        "ai-models",
+        "package-cache",
+        "video-editors",
+        "dev-tools"
+      ]
+    },
+    "title": {
+      "$ref": "#/$defs/i18n"
+    },
     "explain": {
       "$ref": "#/$defs/i18n",
       "description": "What is stored here and what happens if it is removed. Shown to the user."
@@ -27,7 +47,9 @@
       "items": {
         "type": "string",
         "pattern": "^~/[^\\0]+$",
-        "not": { "pattern": "(^|/)\\.{1,2}(/|$)|[*?\\[\\]]|//" },
+        "not": {
+          "pattern": "(^|/)\\.{1,2}(/|$)|[*?\\[\\]]|//"
+        },
         "description": "Inside the home folder only. Exact folder or file, no wildcards. The validator adds placement and overlap checks."
       }
     },
@@ -37,33 +59,144 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["var"],
+        "required": [
+          "var"
+        ],
         "properties": {
-          "var": { "type": "string", "pattern": "^[A-Z][A-Z0-9_]*$" },
+          "var": {
+            "type": "string",
+            "pattern": "^[A-Z][A-Z0-9_]*$"
+          },
           "subpath": {
             "type": "string",
             "pattern": "^[^/\\0][^\\0]*$",
-            "not": { "pattern": "(^|/)\\.{1,2}(/|$)|[*?\\[\\]]|//|/$" },
+            "not": {
+              "pattern": "(^|/)\\.{1,2}(/|$)|[*?\\[\\]]|//|/$"
+            },
             "description": "Added to the variable's value, e.g. HF_HOME + \"hub\". Omit when the value is the location itself."
           }
         }
       }
     },
+    "app_settings": {
+      "type": "array",
+      "description": "Settings files where the app records a location the user chose. Each value found becomes an extra, read-only location.",
+      "items": {
+        "type": "object",
+        "additionalProperties": false,
+        "required": [
+          "file",
+          "format"
+        ],
+        "properties": {
+          "file": {
+            "type": "string",
+            "pattern": "^~/[^\\0]+$",
+            "not": {
+              "pattern": "(^|/)\\.{1,2}(/|$)|[*?\\[\\]]|//"
+            },
+            "description": "The settings file, inside the home folder."
+          },
+          "format": {
+            "enum": [
+              "ini",
+              "json",
+              "sqlite",
+              "pointer"
+            ],
+            "description": "ini: key is Section.key. json: key is a top-level key holding a path or a list of paths. sqlite: key is table.column, first row. pointer: the whole file is one path, no key."
+          },
+          "key": {
+            "type": "string",
+            "pattern": "^[A-Za-z0-9_.-]+$"
+          },
+          "subpath": {
+            "type": "string",
+            "pattern": "^[^/\\0][^\\0]*$",
+            "not": {
+              "pattern": "(^|/)\\.{1,2}(/|$)|[*?\\[\\]]|//|/$"
+            },
+            "description": "Added to the value, e.g. a home folder + \"models\"."
+          }
+        },
+        "allOf": [
+          {
+            "if": {
+              "properties": {
+                "format": {
+                  "enum": [
+                    "ini",
+                    "json",
+                    "sqlite"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "key"
+              ]
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "format": {
+                  "const": "sqlite"
+                }
+              }
+            },
+            "then": {
+              "properties": {
+                "key": {
+                  "pattern": "^[a-z_]+\\.[a-z_]+$"
+                }
+              }
+            }
+          },
+          {
+            "if": {
+              "properties": {
+                "format": {
+                  "const": "pointer"
+                }
+              }
+            },
+            "then": {
+              "not": {
+                "required": [
+                  "key"
+                ]
+              }
+            }
+          }
+        ]
+      }
+    },
     "safety": {
-      "enum": ["safe", "review", "protected"],
+      "enum": [
+        "safe",
+        "review",
+        "protected"
+      ],
       "description": "safe = rebuilt automatically, nothing large to fetch again; review = costs a re-download or rebuild; protected = may hold user work, size only. Nothing is ever pre-selected."
     },
     "official_cleanup": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["command", "source"],
+      "required": [
+        "command",
+        "source"
+      ],
       "properties": {
         "command": {
           "type": "string",
           "minLength": 1,
           "description": "One known tool followed by plain words, flags or <placeholders> (checked by the validator)."
         },
-        "source": { "$ref": "#/$defs/url" }
+        "source": {
+          "$ref": "#/$defs/url"
+        }
       },
       "description": "The app's own cleanup command. Shown to the user as read-only text with a 'deletes permanently' warning; Hoardless never runs it."
     },
@@ -72,7 +205,10 @@
       "description": "true = Hoardless never trashes or moves these files itself; it only shows official_cleanup. Use when removing files by hand can break the app (hard links, shared blobs, live databases)."
     },
     "status": {
-      "enum": ["verified", "unverified"],
+      "enum": [
+        "verified",
+        "unverified"
+      ],
       "description": "unverified rules are hidden from normal users."
     },
     "evidence": {
@@ -80,47 +216,129 @@
       "items": {
         "type": "object",
         "additionalProperties": false,
-        "required": ["type", "checked"],
+        "required": [
+          "type",
+          "checked"
+        ],
         "properties": {
-          "type": { "enum": ["official_doc", "official_source_code", "local_observation"] },
-          "url": { "$ref": "#/$defs/url" },
-          "note": { "type": "string", "minLength": 1, "pattern": "\\S" },
-          "checked": { "type": "string", "pattern": "^\\d{4}-\\d{2}-\\d{2}$", "description": "Must be a real date, not later than today anywhere on Earth (checked by the validator)." }
+          "type": {
+            "enum": [
+              "official_doc",
+              "official_source_code",
+              "local_observation"
+            ]
+          },
+          "url": {
+            "$ref": "#/$defs/url"
+          },
+          "note": {
+            "type": "string",
+            "minLength": 1,
+            "pattern": "\\S"
+          },
+          "checked": {
+            "type": "string",
+            "pattern": "^\\d{4}-\\d{2}-\\d{2}$",
+            "description": "Must be a real date, not later than today anywhere on Earth (checked by the validator)."
+          }
         },
         "allOf": [
           {
-            "if": { "properties": { "type": { "enum": ["official_doc", "official_source_code"] } } },
-            "then": { "required": ["url"] }
+            "if": {
+              "properties": {
+                "type": {
+                  "enum": [
+                    "official_doc",
+                    "official_source_code"
+                  ]
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "url"
+              ]
+            }
           },
           {
-            "if": { "properties": { "type": { "const": "local_observation" } } },
-            "then": { "required": ["note"] }
+            "if": {
+              "properties": {
+                "type": {
+                  "const": "local_observation"
+                }
+              }
+            },
+            "then": {
+              "required": [
+                "note"
+              ]
+            }
           }
         ]
       }
     },
-    "notes": { "type": "string", "description": "Maintainer notes, not shown to users." }
+    "notes": {
+      "type": "string",
+      "description": "Maintainer notes, not shown to users."
+    }
   },
   "allOf": [
     {
-      "if": { "properties": { "status": { "const": "verified" } } },
-      "then": { "properties": { "evidence": { "minItems": 1 } } }
+      "if": {
+        "properties": {
+          "status": {
+            "const": "verified"
+          }
+        }
+      },
+      "then": {
+        "properties": {
+          "evidence": {
+            "minItems": 1
+          }
+        }
+      }
     },
     {
-      "if": { "properties": { "command_only": { "const": true } }, "required": ["command_only"] },
-      "then": { "required": ["official_cleanup"] }
+      "if": {
+        "properties": {
+          "command_only": {
+            "const": true
+          }
+        },
+        "required": [
+          "command_only"
+        ]
+      },
+      "then": {
+        "required": [
+          "official_cleanup"
+        ]
+      }
     }
   ],
   "$defs": {
     "i18n": {
       "type": "object",
       "additionalProperties": false,
-      "required": ["en", "zh"],
+      "required": [
+        "en",
+        "zh"
+      ],
       "properties": {
-        "en": { "type": "string", "pattern": "\\S" },
-        "zh": { "type": "string", "pattern": "\\S" }
+        "en": {
+          "type": "string",
+          "pattern": "\\S"
+        },
+        "zh": {
+          "type": "string",
+          "pattern": "\\S"
+        }
       }
     },
-    "url": { "type": "string", "pattern": "^https://[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+(/\\S*)?$" }
+    "url": {
+      "type": "string",
+      "pattern": "^https://[A-Za-z0-9-]+(\\.[A-Za-z0-9-]+)+(/\\S*)?$"
+    }
   }
 }

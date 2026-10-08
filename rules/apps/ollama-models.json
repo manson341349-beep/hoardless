@@ -18,6 +18,13 @@
       "var": "OLLAMA_MODELS"
     }
   ],
+  "app_settings": [
+    {
+      "file": "~/Library/Application Support/Ollama/db.sqlite",
+      "format": "sqlite",
+      "key": "settings.models"
+    }
+  ],
   "safety": "protected",
   "official_cleanup": {
     "command": "ollama rm <model>",
@@ -36,5 +43,5 @@
       "checked": "2026-10-08"
     }
   ],
-  "notes": "The macOS app's model-location setting lives in ~/Library/Application Support/Ollama/db.sqlite (settings.models) and overrides OLLAMA_MODELS (app/server/server.go); a fixed path misses it, needs a resolver. Never target ~/.ollama as a whole: it holds id_ed25519 (auth key). Not installed on the maintainer's Mac, so no local observation."
+  "notes": "The macOS app's model-location setting lives in ~/Library/Application Support/Ollama/db.sqlite (settings.models) and overrides OLLAMA_MODELS (app/server/server.go); read via app_settings (settings table, models column; app/store/database.go). Never target ~/.ollama as a whole: it holds id_ed25519 (auth key). Not installed on the maintainer's Mac, so no local observation."
 }

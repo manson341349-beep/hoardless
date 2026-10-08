@@ -22,6 +22,23 @@
       "subpath": "pip"
     }
   ],
+  "app_settings": [
+    {
+      "file": "~/Library/Application Support/pip/pip.conf",
+      "format": "ini",
+      "key": "global.cache-dir"
+    },
+    {
+      "file": "~/.config/pip/pip.conf",
+      "format": "ini",
+      "key": "global.cache-dir"
+    },
+    {
+      "file": "~/.pip/pip.conf",
+      "format": "ini",
+      "key": "global.cache-dir"
+    }
+  ],
   "safety": "review",
   "official_cleanup": {
     "command": "pip cache purge",
@@ -45,5 +62,5 @@
       "checked": "2026-10-08"
     }
   ],
-  "notes": "XDG_CACHE_HOME is honoured on macOS only from pip 26.2; the default path is always scanned too. pip.conf cache-dir can also relocate it: needs a resolver."
+  "notes": "XDG_CACHE_HOME is honoured on macOS only from pip 26.2; the default path is always scanned too. pip.conf cache-dir is read via app_settings (user config files in pip's own order; src/pip/_internal/configuration.py)."
 }

@@ -90,7 +90,14 @@ CASES = [
     ("duplicate key", '{"id": "a", "paths": ["~/Movies"], "paths": ["~/.foo/cache"]}', 1, "duplicate key"),
     ("not an object", "[]", 1, "is not of type 'object'"),
     ("wrong-typed id", [rule(paths=["~/.foo/cache"]) | {"id": ["a"]}], 1, "is not of type 'string'"),
+    # app settings files
+    ("settings file in credentials", [rule(paths=["~/.foo/cache"], app_settings=[{"file": "~/.ssh/config", "format": "ini", "key": "Host.path"}])], 1, "personal data"),
+    ("pointer with a key", [rule(paths=["~/.foo/cache"], app_settings=[{"file": "~/.foo/home", "format": "pointer", "key": "x"}])], 1, "should not be valid"),
+    ("ini without a key", [rule(paths=["~/.foo/cache"], app_settings=[{"file": "~/.foo/conf", "format": "ini"}])], 1, "'key' is a required property"),
+    ("sqlite key injection", [rule(paths=["~/.foo/cache"], app_settings=[{"file": "~/.foo/db.sqlite", "format": "sqlite", "key": "settings;drop"}])], 1, "does not match"),
+    ("settings file escapes", [rule(paths=["~/.foo/cache"], app_settings=[{"file": "~/../etc/passwd", "format": "pointer"}])], 1, "should not be valid"),
     # must pass
+    ("lm studio settings", [rule(paths=["~/.lmstudio/models"], app_settings=[{"file": "~/.lmstudio/settings.json", "format": "json", "key": "downloadsFolder"}])], 0, "0 problem(s)"),
     ("whisper cache", [rule(paths=["~/.cache/whisper"], env_overrides=[{"var": "XDG_CACHE_HOME", "subpath": "whisper"}])], 0, "0 problem(s)"),
     ("xcode derived data", p("~/Library/Developer/Xcode/DerivedData"), 0, "0 problem(s)"),
     ("sibling names", [rule("a", paths=["~/.cache/uv"]), rule("b", paths=["~/.cache/uvx"])], 0, "0 problem(s)"),

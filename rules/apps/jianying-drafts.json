@@ -13,6 +13,13 @@
   "paths": [
     "~/Movies/JianyingPro/User Data/Projects/com.lveditor.draft"
   ],
+  "app_settings": [
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCustomDraftPath"
+    }
+  ],
   "safety": "protected",
   "status": "verified",
   "evidence": [
@@ -22,5 +29,5 @@
       "checked": "2026-10-08"
     }
   ],
-  "notes": "Drafts can be moved in the app (currentCustomDraftPath); needs a resolver."
+  "notes": "Drafts can be moved in the app (currentCustomDraftPath, read via app_settings)."
 }

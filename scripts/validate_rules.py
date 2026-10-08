@@ -215,6 +215,14 @@ def main() -> int:
             key = (var,) + (norm("~/" + sub) if sub else ())
             env_claimed.append((key, f"'{var}' + '{sub}'", f.name))
 
+        for setting in as_list(rule.get("app_settings")):
+            f_ = setting.get("file") if isinstance(setting, dict) else None
+            if not isinstance(f_, str) or not f_.startswith("~/"):
+                continue  # already reported by the schema
+            c = norm(f_)
+            if any(inside(c, d) for d in DENY_INSIDE) or any(s.endswith(DENY_SUFFIXES) for s in c):
+                problems.append(f"{f.name}: app_settings file '{f_}' is personal data or credentials")
+
         cleanup = rule.get("official_cleanup")
         if isinstance(cleanup, dict) and isinstance(cleanup.get("command"), str) and cleanup["command"]:
             for msg in command_problems(cleanup["command"]):

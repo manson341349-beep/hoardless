@@ -141,7 +141,7 @@ private struct RuleRow: View {
                         .fixedSize(horizontal: false, vertical: true)
                     ForEach(result.locations) { LocationRow(location: $0, result: result, state: result.states[$0.id] ?? .notScanned, t: t) }
                     ForEach(result.rejected, id: \.self) { r in
-                        Text("\(r.display) — \(t.notUsed): \(r.reason)").font(.caption).foregroundStyle(Theme.dim)
+                        Text(t.rejected(r)).font(.caption).foregroundStyle(Theme.dim).fixedSize(horizontal: false, vertical: true)
                     }
                     if let cleanup = result.rule.officialCleanup { CleanupBox(cleanup: cleanup, t: t) }
                 }
@@ -163,10 +163,21 @@ private struct LocationRow: View {
     let t: Strings
     private var ruleID: String { result.id }
 
+    private var originNote: String? {
+        switch location.origin {
+        case .rulePath: return nil
+        case .environment: return t.fromEnvironment
+        case .appSetting: return t.fromAppSetting
+        }
+    }
+
     var body: some View {
         HStack(spacing: 8) {
-            Text(location.display).font(.callout.monospaced()).foregroundStyle(Theme.paper.opacity(0.8))
-                .textSelection(.enabled).lineLimit(1).truncationMode(.middle)
+            VStack(alignment: .leading, spacing: 2) {
+                Text(location.display).font(.callout.monospaced()).foregroundStyle(Theme.paper.opacity(0.8))
+                    .textSelection(.enabled).lineLimit(1).truncationMode(.middle)
+                if let originNote { Text(originNote).font(.caption2).foregroundStyle(Theme.info) }
+            }
             Spacer()
             Text(t.state(state)).font(.caption).foregroundStyle(Theme.dim)
             switch state {

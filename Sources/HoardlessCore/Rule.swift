@@ -14,6 +14,15 @@ public struct Rule: Decodable, Identifiable, Sendable {
         public let subpath: String?
     }
 
+    /// A settings file where the app records a folder the user chose.
+    public struct AppSetting: Decodable, Sendable {
+        public enum Format: String, Decodable, Sendable { case ini, json, sqlite, pointer }
+        public let file: String
+        public let format: Format
+        public let key: String?
+        public let subpath: String?
+    }
+
     public struct Cleanup: Decodable, Sendable {
         public let command: String
         public let source: String
@@ -37,6 +46,7 @@ public struct Rule: Decodable, Identifiable, Sendable {
     public let explain: Localized
     public let paths: [String]
     public let envOverrides: [EnvOverride]?
+    public let appSettings: [AppSetting]?
     public let safety: Safety
     public let officialCleanup: Cleanup?
     public let commandOnly: Bool?
@@ -45,6 +55,7 @@ public struct Rule: Decodable, Identifiable, Sendable {
     enum CodingKeys: String, CodingKey {
         case id, app, category, title, explain, paths, safety, status
         case envOverrides = "env_overrides"
+        case appSettings = "app_settings"
         case officialCleanup = "official_cleanup"
         case commandOnly = "command_only"
     }

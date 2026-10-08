@@ -14,6 +14,19 @@
     "~/ComfyUI-Shared/models",
     "~/Documents/ComfyUI/models"
   ],
+  "app_settings": [
+    {
+      "file": "~/Library/Application Support/Comfy Desktop/settings.json",
+      "format": "json",
+      "key": "modelsDirs"
+    },
+    {
+      "file": "~/Library/Application Support/ComfyUI/config.json",
+      "format": "json",
+      "key": "basePath",
+      "subpath": "models"
+    }
+  ],
   "safety": "protected",
   "status": "verified",
   "evidence": [
@@ -33,5 +46,5 @@
       "checked": "2026-10-08"
     }
   ],
-  "notes": "~/ComfyUI-Shared/models: current Comfy Desktop default; users can change modelsDirs in Settings > Storage (stored in ~/Library/Application Support/Comfy Desktop/settings.json). ~/Documents/ComfyUI/models: default of the legacy ComfyUI Desktop (repo archived 2026-06-26). Manual git installs keep models/ inside the repo and add folders via extra_model_paths.yaml; needs a resolver. Not installed on the maintainer's Mac."
+  "notes": "~/ComfyUI-Shared/models: current Comfy Desktop default; users can change modelsDirs in Settings > Storage (stored in ~/Library/Application Support/Comfy Desktop/settings.json, folder name from electron-builder.yml productName; not observed locally). ~/Documents/ComfyUI/models: default of the legacy ComfyUI Desktop (repo archived 2026-06-26). Legacy Desktop basePath is read from ~/Library/Application Support/ComfyUI/config.json. Manual git installs (models/ inside the repo, extra_model_paths.yaml) are not covered. Not installed on the maintainer's Mac."
 }

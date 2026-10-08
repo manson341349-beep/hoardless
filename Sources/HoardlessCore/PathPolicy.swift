@@ -5,6 +5,8 @@ public struct Location: Sendable, Hashable, Identifiable {
     public enum Origin: Sendable, Hashable {
         case rulePath
         case environment(String)
+        /// Read from the app's own settings file (the file's ~/ path).
+        case appSetting(String)
     }
 
     /// As written in the rule ("~/.cache/uv") or the variable that produced it ("$UV_CACHE_DIR").
@@ -23,6 +25,7 @@ public struct RejectedLocation: Sendable, Hashable {
     public let display: String
     public let path: String
     public let reason: String
+    public var kind: RejectionReason? = nil
 }
 
 /// Run-time copy of the rules in CLAUDE.md: only inside the home folder, never a whole standard folder,
@@ -92,7 +95,8 @@ public struct PathPolicy: Sendable {
                 guard !accepted.contains(where: { $0.url == real }) else { return }
                 accepted.append(Location(display: display, url: real, origin: origin, needsPermission: needsPermission(real)))
             case .failure(let reason):
-                rejected.append(RejectedLocation(display: display, path: url.path, reason: reason.rawValue))
+                guard !rejected.contains(where: { $0.path == url.path }) else { return }
+                rejected.append(RejectedLocation(display: display, path: url.path, reason: reason.rawValue, kind: reason))
             }
         }
 
@@ -110,7 +114,21 @@ public struct PathPolicy: Sendable {
             let display = "$" + override.var + (override.subpath.map { "/" + $0 } ?? "")
             add(display, url, .environment(override.var))
         }
+        for setting in rule.appSettings ?? [] {
+            for url in AppSettings.paths(for: setting, policy: self) {
+                add(tilde(url), url, .appSetting(setting.file))
+            }
+        }
         return (accepted, rejected)
+    }
+}
+
+extension PathPolicy {
+    /// "/Users/me/x" -> "~/x" for display; other paths unchanged.
+    func tilde(_ url: URL) -> String {
+        guard let rel = relativeComponents(url.standardizedFileURL), !rel.isEmpty else { return url.path }
+        let homeCount = home.pathComponents.count
+        return "~/" + url.standardizedFileURL.pathComponents.dropFirst(homeCount).joined(separator: "/")
     }
 }
 

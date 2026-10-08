@@ -13,6 +13,13 @@
   "paths": [
     "~/Movies/CapCut/User Data/Projects/com.lveditor.draft"
   ],
+  "app_settings": [
+    {
+      "file": "~/Movies/CapCut/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCustomDraftPath"
+    }
+  ],
   "safety": "protected",
   "status": "verified",
   "evidence": [

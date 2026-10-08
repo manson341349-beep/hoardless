@@ -63,6 +63,16 @@ struct Strings {
         case nil: return error.localizedDescription
         }
     }
+    var fromAppSetting: String { s("应用设置里的位置 · 只显示", "From the app's settings · view only") }
+    var fromEnvironment: String { s("环境变量指定的位置 · 只显示", "From an environment variable · view only") }
+    func rejected(_ r: RejectedLocation) -> String {
+        switch r.kind {
+        case .outsideHome?: return s("\(r.path) 不在你的用户目录里（比如外置硬盘），不占这台 Mac 的空间，只列出不测量。",
+                                     "\(r.path) is outside your home folder (for example an external drive). It doesn't use this Mac's disk, so it's listed but not measured.")
+        case .wholeHome?, .wholeStandardFolder?: return s("\(r.path) 是整个标准文件夹，为了安全不测量。", "\(r.path) is a whole standard folder, so it isn't measured, for safety.")
+        case .notHomeRelative?, nil: return "\(r.display) — \(notUsed): \(r.reason)"
+        }
+    }
     var language: String { s("界面语言", "Language") }
     var languageAuto: String { s("跟随系统", "Auto") }
     var scanFirst: String { s("先回到总览点\u{201C}扫描\u{201D}。", "Go back and press Scan first.") }
