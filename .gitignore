@@ -5,3 +5,7 @@ xcuserdata/
 *.xcuserstate
 __pycache__/
 .venv/
+
+# Swift build output
+.swiftpm/
+build/
