@@ -1,0 +1,26 @@
+{
+  "id": "diffusionbee-data",
+  "app": "DiffusionBee",
+  "category": "ai-models",
+  "title": {
+    "en": "DiffusionBee data",
+    "zh": "DiffusionBee 数据"
+  },
+  "explain": {
+    "en": "DiffusionBee's data folder: downloaded models, plus your generated images and history. Hoardless only shows the size.",
+    "zh": "DiffusionBee 的数据文件夹：下载的模型，还有你生成的图片和历史记录。这里只显示大小。"
+  },
+  "paths": [
+    "~/.diffusionbee"
+  ],
+  "safety": "protected",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_source_code",
+      "url": "https://raw.githubusercontent.com/divamgupta/diffusionbee-stable-diffusion-ui/2.5.3/electron_app/src/native_functions.js",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "The root is hard-coded (no env override). images/ holds generated output with no other copy. A future review-level sub-rule could target downloaded_assets/ once re-download is confirmed. Not installed on the maintainer's Mac."
+}

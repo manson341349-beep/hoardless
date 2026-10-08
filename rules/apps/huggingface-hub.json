@@ -1,0 +1,57 @@
+{
+  "id": "huggingface-hub",
+  "app": "Hugging Face",
+  "category": "ai-models",
+  "title": {
+    "en": "Hugging Face model cache",
+    "zh": "Hugging Face 模型缓存"
+  },
+  "explain": {
+    "en": "Models and datasets downloaded by Hugging Face libraries such as transformers and diffusers. They download again when a program needs them; offline use fails until then. Models can share files, so Hoardless only shows Hugging Face's own command, which removes one model at a time.",
+    "zh": "transformers、diffusers 等 Hugging Face 库下载的模型和数据集。程序需要时会重新下载，下载完之前离线用不了。不同模型之间会共用文件，所以这里只给出 Hugging Face 自带的命令，一次删一个模型。"
+  },
+  "paths": [
+    "~/.cache/huggingface/hub"
+  ],
+  "env_overrides": [
+    {
+      "var": "HF_HUB_CACHE"
+    },
+    {
+      "var": "HUGGINGFACE_HUB_CACHE"
+    },
+    {
+      "var": "HF_HOME",
+      "subpath": "hub"
+    },
+    {
+      "var": "XDG_CACHE_HOME",
+      "subpath": "huggingface/hub"
+    }
+  ],
+  "safety": "review",
+  "official_cleanup": {
+    "command": "hf cache rm <repo-id>",
+    "source": "https://huggingface.co/docs/huggingface_hub/guides/manage-cache"
+  },
+  "command_only": true,
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://huggingface.co/docs/huggingface_hub/guides/manage-cache",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "official_doc",
+      "url": "https://huggingface.co/docs/huggingface_hub/package_reference/environment_variables",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "local_observation",
+      "note": "Present on the maintainer's Mac: 4.1G, 11 model folders. macOS 26.6.2.",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "Never target ~/.cache/huggingface as a whole: it holds login tokens (token, stored_tokens). Xet files are stored once in a shared hub/blobs store that repos link into (on by default; HF_HUB_DISABLE_SHARED_BLOBS=1 turns it off, see the Shared blobs across repos section of the manage-cache guide), so removing folders by hand can break other models: command_only."
+}

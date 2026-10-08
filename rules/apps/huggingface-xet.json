@@ -1,0 +1,44 @@
+{
+  "id": "huggingface-xet",
+  "app": "Hugging Face",
+  "category": "ai-models",
+  "title": {
+    "en": "Hugging Face transfer working files",
+    "zh": "Hugging Face 传输工具的工作文件"
+  },
+  "explain": {
+    "en": "Working folder of hf_xet, Hugging Face's file transfer tool. Current versions keep only upload indexes and resume data here; most of the space is usually a download cache left by older versions. Downloaded models (in the hub folder) are not affected; an unfinished upload would start over. The official docs describe deleting this folder to free space.",
+    "zh": "Hugging Face 传文件工具（hf_xet）的工作文件夹。现在的版本只在这里放上传用的索引和断点续传记录，占地方的多半是旧版本留下的下载缓存。删掉不会丢已经下载的模型（模型在 hub 文件夹里），只是没传完的上传要从头再来。官方文档写了可以整个删掉来腾空间。"
+  },
+  "paths": [
+    "~/.cache/huggingface/xet"
+  ],
+  "env_overrides": [
+    {
+      "var": "HF_XET_CACHE"
+    },
+    {
+      "var": "HF_HOME",
+      "subpath": "xet"
+    },
+    {
+      "var": "XDG_CACHE_HOME",
+      "subpath": "huggingface/xet"
+    }
+  ],
+  "safety": "review",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://huggingface.co/docs/huggingface_hub/guides/manage-cache",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "local_observation",
+      "note": "Present on the maintainer's Mac: 8.3G, all in chunk-cache, files last written 2026-01-05. macOS 26.6.2.",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "Kept at review, not safe: no maintainer statement confirms every hf_xet version ignores an old chunk-cache."
+}

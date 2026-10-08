@@ -1,0 +1,25 @@
+{
+  "id": "capcut-drafts",
+  "app": "CapCut",
+  "category": "video-editors",
+  "title": {
+    "en": "CapCut drafts",
+    "zh": "CapCut 草稿"
+  },
+  "explain": {
+    "en": "Your CapCut drafts. This is your work: Hoardless only shows the size.",
+    "zh": "你的 CapCut 草稿，是你的作品。这里只显示大小。"
+  },
+  "paths": [
+    "~/Movies/CapCut/User Data/Projects/com.lveditor.draft"
+  ],
+  "safety": "protected",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "local_observation",
+      "note": "CapCut 8.3.0 on the maintainer's Mac: 1.8G. macOS 26.6.2.",
+      "checked": "2026-10-08"
+    }
+  ]
+}

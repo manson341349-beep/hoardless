@@ -1,0 +1,37 @@
+{
+  "id": "comfyui-models",
+  "app": "ComfyUI Desktop",
+  "category": "ai-models",
+  "title": {
+    "en": "ComfyUI model folders",
+    "zh": "ComfyUI 模型文件夹"
+  },
+  "explain": {
+    "en": "Model folders of ComfyUI Desktop. They often mix downloaded models with ones you trained or merged, so Hoardless only shows the size.",
+    "zh": "ComfyUI 桌面版的模型文件夹。里面常常混着下载的模型和你自己训练、融合的模型，所以这里只显示大小。"
+  },
+  "paths": [
+    "~/ComfyUI-Shared/models",
+    "~/Documents/ComfyUI/models"
+  ],
+  "safety": "protected",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_source_code",
+      "url": "https://github.com/Comfy-Org/Comfy-Desktop/blob/main/src/main/settings.ts",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "official_source_code",
+      "url": "https://github.com/Comfy-Org/desktop/blob/main/src/handlers/pathHandlers.ts",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "official_source_code",
+      "url": "https://github.com/Comfy-Org/desktop/blob/main/src/config/comfyServerConfig.ts",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "~/ComfyUI-Shared/models: current Comfy Desktop default; users can change modelsDirs in Settings > Storage (stored in ~/Library/Application Support/Comfy Desktop/settings.json). ~/Documents/ComfyUI/models: default of the legacy ComfyUI Desktop (repo archived 2026-06-26). Manual git installs keep models/ inside the repo and add folders via extra_model_paths.yaml; needs a resolver. Not installed on the maintainer's Mac."
+}

@@ -1,0 +1,41 @@
+{
+  "id": "torch-hub",
+  "app": "PyTorch",
+  "category": "ai-models",
+  "title": {
+    "en": "PyTorch Hub cache",
+    "zh": "PyTorch Hub 缓存"
+  },
+  "explain": {
+    "en": "Model weights and code downloaded through PyTorch Hub. Programs download them again when needed.",
+    "zh": "通过 PyTorch Hub 下载的模型和代码。程序需要时会重新下载。"
+  },
+  "paths": [
+    "~/.cache/torch/hub"
+  ],
+  "env_overrides": [
+    {
+      "var": "TORCH_HOME",
+      "subpath": "hub"
+    },
+    {
+      "var": "XDG_CACHE_HOME",
+      "subpath": "torch/hub"
+    }
+  ],
+  "safety": "review",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://docs.pytorch.org/docs/2.14/hub.html",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "local_observation",
+      "note": "Present on the maintainer's Mac: 169M in hub/checkpoints. macOS 26.6.2.",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "Programs can also pass their own directory (torch.hub.set_dir, model_dir=); those are invisible from disk."
+}

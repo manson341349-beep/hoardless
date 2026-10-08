@@ -1,0 +1,31 @@
+{
+  "id": "lmstudio-models",
+  "app": "LM Studio",
+  "category": "ai-models",
+  "title": {
+    "en": "LM Studio models",
+    "zh": "LM Studio 模型"
+  },
+  "explain": {
+    "en": "Models downloaded or imported into LM Studio. Imported files may be your only copy, so Hoardless only shows the size. Remove models from LM Studio's My Models page.",
+    "zh": "下载或导入到 LM Studio 的模型。导入的文件可能是你唯一的一份，所以这里只显示大小。要删请在 LM Studio 的 My Models 页面里操作。"
+  },
+  "paths": [
+    "~/.lmstudio/models"
+  ],
+  "safety": "protected",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://lmstudio.ai/docs/app/advanced/import-model",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "local_observation",
+      "note": "Present on the maintainer's Mac (empty); ~/.lmstudio/settings.json downloadsFolder points here. macOS 26.6.2.",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "The folder can be changed in My Models (downloadsFolder in ~/.lmstudio/settings.json) and the whole home moved via ~/.lmstudio-home-pointer; needs a resolver. Never target ~/.lmstudio: it holds credentials and conversations. No official env var found."
+}

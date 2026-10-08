@@ -1,0 +1,26 @@
+{
+  "id": "jianying-cache",
+  "app": "剪映专业版 (JianyingPro)",
+  "category": "video-editors",
+  "title": {
+    "en": "JianyingPro cache",
+    "zh": "剪映专业版缓存"
+  },
+  "explain": {
+    "en": "JianyingPro's cache: downloaded music, effects and online materials. Your drafts point at files in this folder, and material no longer offered online may not come back, so for now Hoardless only shows the size.",
+    "zh": "剪映专业版的缓存：下载的音乐、特效和在线素材。你的草稿直接引用这个文件夹里的文件，已下架的素材删了可能找不回来，所以目前只显示大小。"
+  },
+  "paths": [
+    "~/Movies/JianyingPro/User Data/Cache"
+  ],
+  "safety": "protected",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "local_observation",
+      "note": "JianyingPro 11.5.0 (com.lemon.lvpro) on the maintainer's Mac: 17G; the app's own User Data/Config/globalSetting sets currentCachePath to this folder. macOS 26.6.2.",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "The cache folder can be moved in the app (currentCachePath in globalSetting); needs a resolver. More caches (prerender, RemuxCache) live in ~/Library/Containers/com.lemon.lvpro and are not covered. No official documentation found. Protected until someone confirms that drafts recover every material after the cache is removed; then it can become review."
+}

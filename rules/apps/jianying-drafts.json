@@ -1,0 +1,26 @@
+{
+  "id": "jianying-drafts",
+  "app": "剪映专业版 (JianyingPro)",
+  "category": "video-editors",
+  "title": {
+    "en": "JianyingPro drafts",
+    "zh": "剪映专业版草稿"
+  },
+  "explain": {
+    "en": "Your JianyingPro drafts. This is your work: Hoardless only shows the size so you know where the space went.",
+    "zh": "你的剪映草稿，是你的作品。这里只显示大小，让你知道空间用在哪。"
+  },
+  "paths": [
+    "~/Movies/JianyingPro/User Data/Projects/com.lveditor.draft"
+  ],
+  "safety": "protected",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "local_observation",
+      "note": "JianyingPro 11.5.0 on the maintainer's Mac: 26G; globalSetting currentCustomDraftPath points here. macOS 26.6.2.",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "Drafts can be moved in the app (currentCustomDraftPath); needs a resolver."
+}

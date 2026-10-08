@@ -1,0 +1,51 @@
+{
+  "id": "uv-cache",
+  "app": "uv",
+  "category": "package-cache",
+  "title": {
+    "en": "uv cache",
+    "zh": "uv 缓存"
+  },
+  "explain": {
+    "en": "Python packages cached by uv. Nothing of yours is lost, but large re-downloads follow and offline installs fail until then. uv's docs say not to edit this cache by hand, so Hoardless only shows uv's own command.",
+    "zh": "uv 缓存的 Python 包。不会丢你的东西，但之后要大量重新下载，重新下载完之前离线安装会失败。uv 官方说不要手动改这个缓存，所以这里只给出 uv 自带的清理命令。"
+  },
+  "paths": [
+    "~/.cache/uv",
+    "~/Library/Caches/uv"
+  ],
+  "env_overrides": [
+    {
+      "var": "UV_CACHE_DIR"
+    },
+    {
+      "var": "XDG_CACHE_HOME",
+      "subpath": "uv"
+    }
+  ],
+  "safety": "review",
+  "official_cleanup": {
+    "command": "uv cache clean",
+    "source": "https://docs.astral.sh/uv/concepts/cache/"
+  },
+  "command_only": true,
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://docs.astral.sh/uv/concepts/cache/",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "official_source_code",
+      "url": "https://raw.githubusercontent.com/astral-sh/uv/0.9.11/crates/uv-cache/src/cli.rs",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "local_observation",
+      "note": "Present on the maintainer's Mac: ~/.cache/uv 7.0G. macOS 26.6.2.",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "~/Library/Caches/uv is the pre-0.3.0 location and still wins over XDG_CACHE_HOME if it exists (cli.rs); both default paths are always scanned, so it is never hidden. Files are linked into venvs, so du overstates what a clean frees."
+}

@@ -1,0 +1,32 @@
+{
+  "id": "drawthings-models",
+  "app": "Draw Things",
+  "category": "ai-models",
+  "title": {
+    "en": "Draw Things models",
+    "zh": "Draw Things 模型"
+  },
+  "explain": {
+    "en": "Draw Things models folder. It also holds your saved configurations, imported model lists and LoRA training files, so Hoardless only shows the size. Remove models inside Draw Things.",
+    "zh": "Draw Things 的模型文件夹。里面还有你保存的配置、导入模型清单和 LoRA 训练文件，所以这里只显示大小。要删请在 Draw Things 里操作。"
+  },
+  "paths": [
+    "~/Library/Containers/com.liuliu.draw-things/Data/Documents/Models",
+    "~/Library/Containers/com.liuliu.draw-things/Data/Documents/Downloads"
+  ],
+  "safety": "protected",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_source_code",
+      "url": "https://github.com/drawthingsai/draw-things-community/blob/main/Apps/DrawThingsCLI/DrawThingsCLI.swift",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "official_source_code",
+      "url": "https://github.com/drawthingsai/draw-things-community/blob/main/Libraries/ModelZoo/Sources/ModelZoo.swift",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "Sandbox container paths: reading them can trigger a macOS privacy prompt. The GUI External Folder setting is stored inside the sandbox; needs a resolver. DRAWTHINGS_MODELS_DIR only affects draw-things-cli, not the app. Container not probed on the maintainer's Mac."
+}

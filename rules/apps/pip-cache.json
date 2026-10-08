@@ -1,0 +1,49 @@
+{
+  "id": "pip-cache",
+  "app": "pip",
+  "category": "package-cache",
+  "title": {
+    "en": "pip cache",
+    "zh": "pip 缓存"
+  },
+  "explain": {
+    "en": "Python packages pip has downloaded or built. When needed, pip downloads them again and rebuilds the ones it compiled. Installed packages and environments are not affected.",
+    "zh": "pip 下载过或自己编译过的 Python 包。需要时 pip 会重新下载，编译过的会重新编译。已经装好的包和环境不受影响。"
+  },
+  "paths": [
+    "~/Library/Caches/pip"
+  ],
+  "env_overrides": [
+    {
+      "var": "PIP_CACHE_DIR"
+    },
+    {
+      "var": "XDG_CACHE_HOME",
+      "subpath": "pip"
+    }
+  ],
+  "safety": "review",
+  "official_cleanup": {
+    "command": "pip cache purge",
+    "source": "https://pip.pypa.io/en/stable/topics/caching/"
+  },
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://pip.pypa.io/en/stable/topics/caching/",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "official_doc",
+      "url": "https://pip.pypa.io/en/stable/cli/pip/",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "local_observation",
+      "note": "Present on the maintainer's Mac: 360M. macOS 26.6.2.",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "XDG_CACHE_HOME is honoured on macOS only from pip 26.2; the default path is always scanned too. pip.conf cache-dir can also relocate it: needs a resolver."
+}

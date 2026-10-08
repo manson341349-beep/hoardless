@@ -1,0 +1,32 @@
+{
+  "id": "capcut-cache",
+  "app": "CapCut",
+  "category": "video-editors",
+  "title": {
+    "en": "CapCut cache",
+    "zh": "CapCut 缓存"
+  },
+  "explain": {
+    "en": "CapCut's cache: downloaded effects, fonts, music and other temporary files. Your drafts point at files in this folder, and material no longer offered online may not come back, so for now Hoardless only shows the size.",
+    "zh": "CapCut 的缓存：下载的特效、字体、音乐和其他临时文件。你的草稿直接引用这个文件夹里的文件，已下架的素材删了可能找不回来，所以目前只显示大小。"
+  },
+  "paths": [
+    "~/Movies/CapCut/User Data/Cache",
+    "~/Library/Caches/com.lemon.lvoverseas"
+  ],
+  "safety": "protected",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://www.capcut.com/help/template-export-gets-stuck",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "local_observation",
+      "note": "CapCut 8.3.0 (com.lemon.lvoverseas) on the maintainer's Mac: ~/Movies/CapCut/User Data/Cache 3.8G; ~/Library/Caches/com.lemon.lvoverseas absent. macOS 26.6.2.",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "The CapCut help page names ~/Library/Caches/com.lemon.lvoverseas; the ~/Movies path is from local observation only. Protected until someone confirms that drafts recover every material after the cache is removed."
+}

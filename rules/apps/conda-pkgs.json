@@ -1,0 +1,41 @@
+{
+  "id": "conda-pkgs",
+  "app": "conda",
+  "category": "package-cache",
+  "title": {
+    "en": "conda package cache",
+    "zh": "conda 包缓存"
+  },
+  "explain": {
+    "en": "Packages conda has downloaded. Files are shared with your environments, so removing them by hand can break them; Hoardless only shows conda's own command. That command cleans all of conda's package caches, not just this folder, so it may free more than shown here. Run it with --dry-run first to preview.",
+    "zh": "conda 下载过的包。这些文件和你的 Python 环境共用，手动删可能把环境弄坏，所以这里只给出 conda 自带的清理命令。这条命令会清理 conda 所有的包缓存，不只这个文件夹，腾出的空间可能比这里显示的多。可以先加 --dry-run 预览一下。"
+  },
+  "paths": [
+    "~/.conda/pkgs"
+  ],
+  "env_overrides": [
+    {
+      "var": "CONDA_PKGS_DIRS"
+    }
+  ],
+  "safety": "review",
+  "official_cleanup": {
+    "command": "conda clean --all",
+    "source": "https://docs.conda.io/projects/conda/en/latest/commands/clean.html"
+  },
+  "command_only": true,
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_source_code",
+      "url": "https://raw.githubusercontent.com/conda/conda/main/conda/base/context.py",
+      "checked": "2026-10-08"
+    },
+    {
+      "type": "official_doc",
+      "url": "https://docs.conda.io/projects/conda/en/latest/user-guide/configuration/settings.html",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "The main cache is <root_prefix>/pkgs, usually outside the home folder (/opt/anaconda3, Homebrew Caskroom) and so out of scope until resolvers exist. mamba/micromamba (~/micromamba/pkgs, ~/.mamba/pkgs) need their own rule with micromamba's command. CONDA_PKGS_DIRS can hold several paths; the separator is not documented, so treat it as one path until verified."
+}

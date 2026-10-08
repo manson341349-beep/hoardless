@@ -1,0 +1,26 @@
+{
+  "id": "docker-desktop-disk",
+  "app": "Docker Desktop",
+  "category": "dev-tools",
+  "title": {
+    "en": "Docker Desktop disk",
+    "zh": "Docker Desktop 虚拟磁盘"
+  },
+  "explain": {
+    "en": "Docker Desktop's virtual disk with all images, containers and volumes. Volumes can hold databases and project data, so Hoardless only shows the size. Use Docker Desktop's own clean-up tools instead.",
+    "zh": "Docker Desktop 的虚拟磁盘，装着所有镜像、容器和数据卷。数据卷里可能有数据库和项目数据，所以这里只显示大小，请用 Docker Desktop 自带的清理功能。"
+  },
+  "paths": [
+    "~/Library/Containers/com.docker.docker/Data/vms/0/data/Docker.raw"
+  ],
+  "safety": "protected",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://docs.docker.com/desktop/settings-and-maintenance/backup-and-restore/",
+      "checked": "2026-10-08"
+    }
+  ],
+  "notes": "Location can be changed in Settings > Resources > Advanced > Disk image location; needs a resolver. Sandbox container path: reading it can trigger a privacy prompt. Docker.raw is sparse, so its apparent size overstates real usage."
+}
