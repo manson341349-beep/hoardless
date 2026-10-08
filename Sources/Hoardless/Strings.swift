@@ -7,7 +7,22 @@ struct Strings {
     private func s(_ zh: String, _ en: String) -> String { chinese ? zh : en }
 
     var scanning: String { s("正在扫描…", "Scanning…") }
-    func found(_ size: String) -> String { s("找到 \(size)", "Found \(size)") }
+    var heroIdle: String { s("看看你的 Mac\n囤了什么", "See what your Mac is hoarding") }
+    var heroScanning: String { s("正在翻找…", "Looking around…") }
+    var idleHint: String { s("只读扫描，不会删除任何东西", "Read-only scan. Nothing gets deleted.") }
+    func lookingAt(_ app: String) -> String { s("正在查看 \(app)…", "Looking at \(app)…") }
+    func doneSummary(actionable: String, protected: String) -> String {
+        s("其中 \(actionable) 可以处理 · \(protected) 可能有你的作品，只看不动",
+          "\(actionable) you can act on · \(protected) may hold your work, view only")
+    }
+    var notChecked: String { s("待检查", "Not checked") }
+    var tapToCheck: String { s("点开后由你决定是否读取", "Open it to decide") }
+    var scan: String { s("扫描", "Scan") }
+    var stop: String { s("停止", "Stop") }
+    var back: String { s("返回", "Back") }
+    var language: String { s("界面语言", "Language") }
+    var languageAuto: String { s("跟随系统", "Auto") }
+    var scanFirst: String { s("先回到总览点\u{201C}扫描\u{201D}。", "Go back and press Scan first.") }
     var readOnlyNotice: String { s("只读版本：只查看占用，不会删除或移动任何文件。", "Read-only version: it only looks. Nothing is deleted or moved.") }
     var rescan: String { s("重新扫描", "Rescan") }
     var loadFailed: String { s("读取规则失败", "Could not load rules") }
@@ -47,7 +62,7 @@ struct Strings {
         case .scanning: return s("扫描中…", "Scanning…")
         case .missing: return s("不存在", "Not present")
         case .measured(let u):
-            let size = ContentView.size(u.bytes)
+            let size = Bytes.text(u.bytes)
             return u.unreadable > 0 ? s("\(size)（\(u.unreadable) 项无权读取）", "\(size) (\(u.unreadable) unreadable)") : size
         case .failed(let why): return s("出错：\(why)", "Error: \(why)")
         }

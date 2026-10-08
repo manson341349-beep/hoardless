@@ -93,28 +93,47 @@ public enum ScanPlan {
         }
     }
 
-    /// Measures every location that does not need permission, a few at a time.
-    public static func scanAutomatic(_ results: [RuleResult]) async -> [RuleResult] {
+    /// One location finished measuring.
+    public struct Event: Sendable {
+        public let ruleID: String
+        public let locationID: String
+        public let state: LocationState
+    }
+
+    /// Measures every location that does not need permission, a few at a time, reporting each one as it finishes.
+    /// Cancelling the consuming task stops the scan.
+    public static func scanEvents(_ results: [RuleResult]) -> AsyncStream<Event> {
         let jobs = results.flatMap { r in r.locations.filter { !$0.needsPermission }.map { (r.id, $0) } }
-        let measured = await withTaskGroup(of: (String, LocationState).self) { group in
-            var out: [String: LocationState] = [:]
-            var iterator = jobs.makeIterator()
-            func next() -> Bool {
-                guard let (_, loc) = iterator.next() else { return false }
-                group.addTask { (loc.id, Scanner.measure(loc.url, isCancelled: { Task.isCancelled })) }
-                return true
+        return AsyncStream { continuation in
+            let task = Task.detached(priority: .userInitiated) {
+                await withTaskGroup(of: Event.self) { group in
+                    var iterator = jobs.makeIterator()
+                    func next() -> Bool {
+                        guard let (ruleID, loc) = iterator.next() else { return false }
+                        group.addTask {
+                            Event(ruleID: ruleID, locationID: loc.id,
+                                  state: Scanner.measure(loc.url, isCancelled: { Task.isCancelled }))
+                        }
+                        return true
+                    }
+                    for _ in 0..<4 where next() {}
+                    while let event = await group.next() {
+                        continuation.yield(event)
+                        _ = next()
+                    }
+                }
+                continuation.finish()
             }
-            for _ in 0..<4 where next() {}
-            while let (id, state) = await group.next() {
-                out[id] = state
-                _ = next()
-            }
-            return out
+            continuation.onTermination = { _ in task.cancel() }
         }
-        return results.map { r in
-            var r = r
-            for (id, state) in measured where r.states[id] != nil { r.states[id] = state }
-            return r
+    }
+
+    /// Same scan, returned all at once.
+    public static func scanAutomatic(_ results: [RuleResult]) async -> [RuleResult] {
+        var results = results
+        for await event in scanEvents(results) {
+            if let i = results.firstIndex(where: { $0.id == event.ruleID }) { results[i].states[event.locationID] = event.state }
         }
+        return results
     }
 }

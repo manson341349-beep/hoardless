@@ -12,6 +12,7 @@ rm -rf "$APP"
 mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN/Hoardless" "$APP/Contents/MacOS/Hoardless"
 cp -R rules/apps "$APP/Contents/Resources/rules"
+cp -R Sources/Hoardless/Resources/Art "$APP/Contents/Resources/Art"
 
 cat > "$APP/Contents/Info.plist" <<'PLIST'
 <?xml version="1.0" encoding="UTF-8"?>

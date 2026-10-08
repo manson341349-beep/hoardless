@@ -84,7 +84,10 @@ Rule fixes and new rules are the most helpful contributions.
 
 ## License / 许可证
 
-[GPL-3.0](LICENSE)
+Source code: [GPL-3.0](LICENSE). The mascot and icons in `Sources/Hoardless/Resources/Art` are not GPL; all rights
+reserved, see [their license](Sources/Hoardless/Resources/Art/LICENSE.md).
+
+源代码：[GPL-3.0](LICENSE)。`Sources/Hoardless/Resources/Art` 里的吉祥物和图标不属于 GPL，版权保留，见[素材版权说明](Sources/Hoardless/Resources/Art/LICENSE.md)。
 
 ## About / 关于作者
 

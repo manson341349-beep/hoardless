@@ -14,10 +14,11 @@ struct HoardlessApp: App {
         WindowGroup("Hoardless") {
             ContentView()
                 .environmentObject(model)
-                .frame(minWidth: 760, minHeight: 560)
-                .task { await model.rescan() }
+                .frame(minWidth: 1000, minHeight: 680)
                 .onAppear { NSApplication.shared.activate() }
         }
+        .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentMinSize)
+        .defaultSize(width: 1080, height: 720)
     }
 }

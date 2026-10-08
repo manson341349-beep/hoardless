@@ -148,6 +148,53 @@ final class HoardlessCoreTests: XCTestCase {
         XCTAssertEqual(try fm.attributesOfItem(atPath: dir.appendingPathComponent("a.bin").path)[.modificationDate] as? Date, mtime)
     }
 
+    private func rule(id: String, category: String, safety: String, commandOnly: Bool = false, paths: [String]) throws -> Rule {
+        var json: [String: Any] = [
+            "id": id, "app": "T", "category": category, "title": ["en": "t", "zh": "t"], "explain": ["en": "e", "zh": "e"],
+            "paths": paths, "safety": safety, "status": "verified",
+        ]
+        if commandOnly { json["command_only"] = true }
+        return try JSONDecoder().decode(Rule.self, from: JSONSerialization.data(withJSONObject: json))
+    }
+
+    func testScanEventsReportEachAutomaticLocationOnce() async throws {
+        let policy = PathPolicy(home: home)
+        try write(home.appendingPathComponent(".cache/a/x.bin"), bytes: 10_000)
+        try write(home.appendingPathComponent(".cache/b/x.bin"), bytes: 10_000)
+        let plan = ScanPlan.make(rules: [
+            try rule(id: "a", category: "package-cache", safety: "review", paths: ["~/.cache/a", "~/.cache/missing"]),
+            try rule(id: "b", category: "ai-models", safety: "review", paths: ["~/.cache/b", "~/Documents/x"]),
+        ], policy: policy, environment: [:])
+        var seen: [String] = []
+        for await event in ScanPlan.scanEvents(plan) { seen.append(event.locationID) }
+        let expected = plan.flatMap { $0.locations.filter { !$0.needsPermission }.map(\.id) }
+        XCTAssertEqual(seen.sorted(), expected.sorted(), "every automatic location exactly once, no permission folder")
+        XCTAssertEqual(seen.count, 3)
+    }
+
+    func testSummaryBucketsBySafety() async throws {
+        let policy = PathPolicy(home: home)
+        for name in ["p", "c", "r"] { try write(home.appendingPathComponent(".cache/\(name)/x.bin"), bytes: 100_000) }
+        let plan = ScanPlan.make(rules: [
+            try rule(id: "p", category: "video-editors", safety: "protected", paths: ["~/.cache/p"]),
+            try rule(id: "c", category: "video-editors", safety: "review", commandOnly: true, paths: ["~/.cache/c"]),
+            try rule(id: "r", category: "video-editors", safety: "review", paths: ["~/.cache/r"]),
+            try rule(id: "w", category: "dev-tools", safety: "protected", paths: ["~/Library/Containers/com.x/Data/y"]),
+        ], policy: policy, environment: [:])
+        let before = Summary.byCategory(plan)
+        XCTAssertEqual(before[.videoEditors]?.isComplete, false)
+        let s = Summary.byCategory(await ScanPlan.scanAutomatic(plan))
+        let video = try XCTUnwrap(s[.videoEditors])
+        XCTAssertTrue(video.isComplete)
+        XCTAssertGreaterThan(video.protectedBytes, 0)
+        XCTAssertGreaterThan(video.commandOnlyBytes, 0)
+        XCTAssertGreaterThan(video.reviewBytes, 0)
+        XCTAssertEqual(video.bytes, video.protectedBytes + video.commandOnlyBytes + video.reviewBytes)
+        XCTAssertEqual(video.actionableBytes, video.commandOnlyBytes + video.reviewBytes, "protected never counts as actionable")
+        XCTAssertEqual(s[.devTools]?.waitingForPermission, true)
+        XCTAssertEqual(s[.devTools]?.bytes, 0)
+    }
+
     func testAutomaticScanSkipsPermissionFolders() async throws {
         let policy = PathPolicy(home: home)
         try write(home.appendingPathComponent("Documents/ComfyUI/models/m.bin"), bytes: 10_000)

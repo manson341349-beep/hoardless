@@ -11,7 +11,7 @@ let package = Package(
     targets: [
         // Rules, path safety and read-only scanning. No UI, no file changes.
         .target(name: "HoardlessCore", resources: [.copy("Resources/rules")]),
-        .executableTarget(name: "Hoardless", dependencies: ["HoardlessCore"]),
+        .executableTarget(name: "Hoardless", dependencies: ["HoardlessCore"], resources: [.copy("Resources/Art")]),
         // Prints a scan as JSON; used to check the app's numbers against du.
         .executableTarget(name: "hoardless-cli", dependencies: ["HoardlessCore"]),
         .testTarget(name: "HoardlessCoreTests", dependencies: ["HoardlessCore"]),
