@@ -59,11 +59,11 @@ RAM "boosters", system-folder "junk", app uninstalling (for now), browser/privac
 | conda | conda package cache / conda 包缓存 | review · 要重新下载 · command only / 只给命令 |
 | pip | pip cache / pip 缓存 | review · 要重新下载 |
 | uv | uv cache / uv 缓存 | review · 要重新下载 · command only / 只给命令 |
-| CapCut | CapCut downloaded effects and music / CapCut 下载的特效和音乐 | protected · 只看 |
-| CapCut | CapCut thumbnails, waveforms and speech recognition / CapCut 缩略图、波形和语音识别缓存 | review · 要重新下载 |
+| CapCut | CapCut downloaded materials and app data / CapCut 下载的素材和应用数据 | protected · 只看 |
+| CapCut | CapCut rebuildable cache / CapCut 可重建的缓存 | review · 要重新下载 |
 | CapCut | CapCut drafts / CapCut 草稿 | protected · 只看 |
-| 剪映专业版 (JianyingPro) | JianyingPro downloaded effects and music / 剪映专业版下载的特效和音乐 | protected · 只看 |
-| 剪映专业版 (JianyingPro) | JianyingPro thumbnails, waveforms and speech recognition / 剪映专业版缩略图、波形和语音识别缓存 | review · 要重新下载 |
+| 剪映专业版 (JianyingPro) | JianyingPro downloaded materials and app data / 剪映专业版下载的素材和应用数据 | protected · 只看 |
+| 剪映专业版 (JianyingPro) | JianyingPro rebuildable cache / 剪映专业版可重建的缓存 | review · 要重新下载 |
 | 剪映专业版 (JianyingPro) | JianyingPro drafts / 剪映专业版草稿 | protected · 只看 |
 | Docker Desktop | Docker Desktop disk / Docker Desktop 虚拟磁盘 | protected · 只看 |
 

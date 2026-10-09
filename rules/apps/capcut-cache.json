@@ -3,18 +3,22 @@
   "app": "CapCut",
   "category": "video-editors",
   "title": {
-    "en": "CapCut downloaded effects and music",
-    "zh": "CapCut 下载的特效和音乐"
+    "en": "CapCut downloaded materials and app data",
+    "zh": "CapCut 下载的素材和应用数据"
   },
   "explain": {
-    "en": "Effects, music and online materials CapCut downloaded, and CapCut's own cache folder. Your drafts point at these files, and material no longer offered online may not come back, so Hoardless only shows the size.",
-    "zh": "CapCut 下载的特效、音乐和在线素材，以及 CapCut 自己的缓存文件夹。你的草稿直接引用这些文件，已下架的素材删了可能找不回来，所以只显示大小。"
+    "en": "Effects, music, text templates and online materials CapCut downloaded, plus its own material index, cloud-draft data, AI material records and cache folder. Your drafts point at some of these files, material no longer offered online may not come back, and some may be things you made in CapCut, so Hoardless only shows the size.",
+    "zh": "CapCut 下载的特效、音乐、文字模板和在线素材，以及 CapCut 自己的素材索引、云草稿数据、AI 素材记录和缓存文件夹。你的草稿直接引用其中一些文件，已下架的素材删了可能找不回来，有些还可能是你在 CapCut 里生成的内容，所以只显示大小。"
   },
   "paths": [
     "~/Movies/CapCut/User Data/Cache/effect",
     "~/Movies/CapCut/User Data/Cache/music",
     "~/Movies/CapCut/User Data/Cache/artistEffect",
     "~/Movies/CapCut/User Data/Cache/onlineMaterial",
+    "~/Movies/CapCut/User Data/Cache/ressdk_db",
+    "~/Movies/CapCut/User Data/Cache/AigcMaterailCache",
+    "~/Movies/CapCut/User Data/Cache/AITextTemplate",
+    "~/Movies/CapCut/User Data/Cache/cloudDraft",
     "~/Library/Caches/com.lemon.lvoverseas"
   ],
   "safety": "protected",
@@ -27,9 +31,9 @@
     },
     {
       "type": "local_observation",
-      "note": "CapCut 9.5.0 (com.lemon.lvoverseas) on the maintainer's Mac: effect 1.37 GB, music 0.24 GB, onlineMaterial 0.06 GB, artistEffect 0.02 GB inside ~/Movies/CapCut/User Data/Cache; ~/Library/Caches/com.lemon.lvoverseas absent. macOS 26.6.2.",
+      "note": "CapCut 9.5.0 (com.lemon.lvoverseas) on the maintainer's Mac: inside ~/Movies/CapCut/User Data/Cache, effect 1.37 GB, ressdk_db 0.46 GB (SQLite), music 0.24 GB, onlineMaterial 0.06 GB, AigcMaterailCache 0.06 GB, artistEffect 0.02 GB, AITextTemplate and cloudDraft 0.01 GB each; ~/Library/Caches/com.lemon.lvoverseas absent. macOS 26.6.2.",
       "checked": "2026-10-09"
     }
   ],
-  "notes": "The CapCut help page names ~/Library/Caches/com.lemon.lvoverseas; the ~/Movies paths are from local observation only. CapCut's globalSetting has no cache-location key, so a moved cache is not followed. Only the downloaded-material folders are listed; the folders the app rebuilds are in capcut-generated-cache. Smaller Cache subfolders (ressdk_db 0.45 GB and others) are not covered yet. Not tested whether drafts recover these materials after removal, so they stay protected."
+  "notes": "The CapCut help page names ~/Library/Caches/com.lemon.lvoverseas; the ~/Movies paths are from local observation only. CapCut's globalSetting has no cache-location key, so a moved cache is not followed. Folders the app rebuilds are in capcut-generated-cache. Not covered: about 45 Cache subfolders under 5 MB (about 17 MB together) and loose files. Not tested, on purpose: removing these could make an autosaved draft lose a template or material."
 }

@@ -3,18 +3,27 @@
   "app": "剪映专业版 (JianyingPro)",
   "category": "video-editors",
   "title": {
-    "en": "JianyingPro thumbnails, waveforms and speech recognition",
-    "zh": "剪映专业版缩略图、波形和语音识别缓存"
+    "en": "JianyingPro rebuildable cache",
+    "zh": "剪映专业版可重建的缓存"
   },
   "explain": {
-    "en": "Thumbnails, audio waveforms, frame images and speech-recognition results JianyingPro made for your drafts. When you open a draft again, JianyingPro remakes the thumbnails and waveforms by itself, and captions you already made stay in the draft. Running auto captions again on the same clip has to recognize the speech again.",
-    "zh": "剪映为你的草稿生成的缩略图、音频波形、画面图片和语音识别结果。再打开草稿时，缩略图和波形剪映会自己重新生成；已经做好的字幕保存在草稿里，不受影响。以后对同一段素材再点“识别字幕”，需要重新识别一遍。"
+    "en": "Thumbnails, audio waveforms, frame images and speech-recognition results JianyingPro made for your drafts. When you open a draft again, JianyingPro remakes the thumbnails and waveforms by itself, and captions you already made stay in the draft. Running auto captions again on the same clip has to recognize the speech again. Also previews rendered for playback, web-panel files, font previews and other temporary files, which JianyingPro makes or downloads again when needed.",
+    "zh": "剪映为你的草稿生成的缩略图、音频波形、画面图片和语音识别结果。再打开草稿时，缩略图和波形剪映会自己重新生成；已经做好的字幕保存在草稿里，不受影响。以后对同一段素材再点“识别字幕”，需要重新识别一遍。还包括播放用的预渲染、界面网页文件、字体预览图等临时文件，剪映需要时会自己重新生成或下载。"
   },
   "paths": [
     "~/Movies/JianyingPro/User Data/Cache/recognize",
     "~/Movies/JianyingPro/User Data/Cache/image",
     "~/Movies/JianyingPro/User Data/Cache/frameThumbnail",
-    "~/Movies/JianyingPro/User Data/Cache/audioWave"
+    "~/Movies/JianyingPro/User Data/Cache/audioWave",
+    "~/Movies/JianyingPro/User Data/Cache/prerender",
+    "~/Movies/JianyingPro/User Data/Cache/MotionBlurCache",
+    "~/Movies/JianyingPro/User Data/Cache/VENetworkPlayer",
+    "~/Movies/JianyingPro/User Data/Cache/importcache3",
+    "~/Movies/JianyingPro/User Data/Cache/GeckoCpp",
+    "~/Movies/JianyingPro/User Data/Cache/deployment",
+    "~/Movies/JianyingPro/User Data/Cache/vepso",
+    "~/Movies/JianyingPro/User Data/Cache/fontImage",
+    "~/Movies/JianyingPro/User Data/Cache/DynamicDownloader"
   ],
   "app_settings": [
     {
@@ -40,6 +49,60 @@
       "format": "ini",
       "key": "General.currentCachePath",
       "subpath": "audioWave"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "prerender"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "MotionBlurCache"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "VENetworkPlayer"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "importcache3"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "GeckoCpp"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "deployment"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "vepso"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "fontImage"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "DynamicDownloader"
     }
   ],
   "safety": "review",
@@ -49,7 +112,12 @@
       "type": "local_observation",
       "note": "JianyingPro 11.5.0 on the maintainer's Mac, macOS 26.6.2: with JianyingPro quit, moved recognize (6.27 GB), image (3.75 GB), frameThumbnail (0.90 GB) and audioWave (0.71 GB) out of User Data/Cache, then opened a draft with auto captions. Captions were intact; thumbnails and waveforms were remade (under 10 MB written); recognize stayed empty. Folders were put back afterwards and matched the snapshot taken before (98,318 entries).",
       "checked": "2026-10-09"
+    },
+    {
+      "type": "local_observation",
+      "note": "Second test, same day and versions: moved prerender, MotionBlurCache, VENetworkPlayer, importcache3, GeckoCpp, deployment, vepso, fontImage and DynamicDownloader (528 MB) aside, then opened JianyingPro and the draft 代号002. Home page, draft, playback and the Text and Effects panels worked; JianyingPro downloaded or remade GeckoCpp, fontImage, importcache3 and DynamicDownloader (49 MB), the rest when needed. Effect and template previews in the panels were blank, the same as in a control run with all folders in place. Folders were put back and matched the snapshot (12,581 entries).",
+      "checked": "2026-10-09"
     }
   ],
-  "notes": "Tested with one draft. The draft's own files keep the captions; recognize only speeds up recognizing the same media again."
+  "notes": "Tested with one draft each time. The draft's own files keep the captions; recognize only speeds up recognizing the same media again."
 }

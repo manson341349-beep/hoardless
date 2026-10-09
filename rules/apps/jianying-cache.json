@@ -3,18 +3,27 @@
   "app": "剪映专业版 (JianyingPro)",
   "category": "video-editors",
   "title": {
-    "en": "JianyingPro downloaded effects and music",
-    "zh": "剪映专业版下载的特效和音乐"
+    "en": "JianyingPro downloaded materials and app data",
+    "zh": "剪映专业版下载的素材和应用数据"
   },
   "explain": {
-    "en": "Effects, music and online materials JianyingPro downloaded. Your drafts point at these files, and material no longer offered online may not come back, so Hoardless only shows the size.",
-    "zh": "剪映专业版下载的特效、音乐和在线素材。你的草稿直接引用这些文件，已下架的素材删了可能找不回来，所以只显示大小。"
+    "en": "Effects, music, text templates, online materials and speech models JianyingPro downloaded, plus its own material index, cloud-draft data and AI material records. Your drafts point at some of these files, material no longer offered online may not come back, and some may be things you made in JianyingPro, so Hoardless only shows the size.",
+    "zh": "剪映专业版下载的特效、音乐、文字模板、在线素材和语音模型，以及剪映自己的素材索引、云草稿数据和 AI 素材记录。你的草稿直接引用其中一些文件，已下架的素材删了可能找不回来，有些还可能是你在剪映里生成的内容，所以只显示大小。"
   },
   "paths": [
     "~/Movies/JianyingPro/User Data/Cache/effect",
     "~/Movies/JianyingPro/User Data/Cache/music",
     "~/Movies/JianyingPro/User Data/Cache/artistEffect",
-    "~/Movies/JianyingPro/User Data/Cache/onlineMaterial"
+    "~/Movies/JianyingPro/User Data/Cache/onlineMaterial",
+    "~/Movies/JianyingPro/User Data/Cache/AITextTemplate",
+    "~/Movies/JianyingPro/User Data/Cache/local_models",
+    "~/Movies/JianyingPro/User Data/Cache/ressdk_db",
+    "~/Movies/JianyingPro/User Data/Cache/ILASDKDB",
+    "~/Movies/JianyingPro/User Data/Cache/AIAvatarCache",
+    "~/Movies/JianyingPro/User Data/Cache/agentCache",
+    "~/Movies/JianyingPro/User Data/Cache/jimeng",
+    "~/Movies/JianyingPro/User Data/Cache/cloudDraft",
+    "~/Movies/JianyingPro/User Data/Cache/AigcMaterailCache"
   ],
   "app_settings": [
     {
@@ -40,6 +49,60 @@
       "format": "ini",
       "key": "General.currentCachePath",
       "subpath": "onlineMaterial"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "AITextTemplate"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "local_models"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "ressdk_db"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "ILASDKDB"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "AIAvatarCache"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "agentCache"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "jimeng"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "cloudDraft"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "AigcMaterailCache"
     }
   ],
   "safety": "protected",
@@ -47,9 +110,9 @@
   "evidence": [
     {
       "type": "local_observation",
-      "note": "JianyingPro 11.5.0 (com.lemon.lvpro) on the maintainer's Mac: effect 2.22 GB, music 0.87 GB, artistEffect 0.26 GB, onlineMaterial 0.07 GB inside User Data/Cache; the app's own User Data/Config/globalSetting sets currentCachePath to that Cache folder. macOS 26.6.2.",
+      "note": "JianyingPro 11.5.0 (com.lemon.lvpro) on the maintainer's Mac: inside User Data/Cache, effect 2.22 GB, music 0.87 GB, AITextTemplate 0.66 GB (json, ttf, zip), local_models 0.33 GB (speech-recognition model), artistEffect 0.26 GB, ressdk_db 0.16 GB (SQLite), ILASDKDB 0.06 GB, onlineMaterial 0.07 GB and smaller AI/cloud folders; the app's own User Data/Config/globalSetting sets currentCachePath to that Cache folder. macOS 26.6.2.",
       "checked": "2026-10-09"
     }
   ],
-  "notes": "The cache folder can be moved in the app (currentCachePath in globalSetting, read via app_settings). Only the downloaded-material folders are listed; the folders the app rebuilds are in jianying-generated-cache. About 1.9 GB of smaller Cache subfolders (AITextTemplate, local_models, prerender, ressdk_db and dozens of tiny ones) are not covered by any rule yet. More caches (prerender, RemuxCache) live in ~/Library/Containers/com.lemon.lvpro and are not covered. No official documentation found. Not tested whether drafts recover these materials after removal, so they stay protected."
+  "notes": "The cache folder can be moved in the app (currentCachePath in globalSetting, read via app_settings). Folders the app rebuilds are in jianying-generated-cache. Not covered: about 60 Cache subfolders under 5 MB (about 18 MB together) and loose files in Cache (rp.db, gecko.db and their -wal/-shm files, which must never be moved apart from each other). Not tested, on purpose: removing these could make an autosaved draft lose a template or material. More caches (prerender, RemuxCache) live in ~/Library/Containers/com.lemon.lvpro and are not covered. No official documentation found. Not tested whether drafts recover these materials after removal, so they stay protected."
 }
