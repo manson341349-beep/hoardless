@@ -1,8 +1,31 @@
 #!/bin/bash
 # Builds build/Hoardless.app for local use (ad-hoc signed, not notarized).
-# Usage: scripts/build_app.sh
+# Usage: scripts/build_app.sh [--install]
+#   --install  also copy it to ~/Applications/Hoardless.app. Run it from there: macOS cannot show the icon of an app
+#              inside Documents in some places (Stage Manager shows a blank one), because that folder is protected.
 set -euo pipefail
 cd "$(dirname "$0")/.."
+
+INSTALL=0
+case "${1:-}" in
+    "") ;;
+    --install) INSTALL=1 ;;
+    *) echo "Usage: scripts/build_app.sh [--install]" >&2; exit 2 ;;
+esac
+BUNDLE_ID="io.github.manson341349-beep.hoardless"
+DEST="$HOME/Applications/Hoardless.app"
+# Check before building, so a refusal costs nothing.
+if [ "$INSTALL" = 1 ] && [ -e "$DEST" ]; then
+    OLD_ID="$(/usr/libexec/PlistBuddy -c "Print :CFBundleIdentifier" "$DEST/Contents/Info.plist" 2>/dev/null || true)"
+    if [ "$OLD_ID" != "$BUNDLE_ID" ]; then
+        echo "Not installing: $DEST is another app (bundle id '${OLD_ID:-unknown}'). Move it away first." >&2
+        exit 1
+    fi
+    if pgrep -f "^$DEST/Contents/MacOS/" >/dev/null; then
+        echo "Not installing: Hoardless is running from $DEST. Quit it first." >&2
+        exit 1
+    fi
+fi
 
 swift build -c release --product Hoardless
 BIN="$(swift build -c release --show-bin-path)"
@@ -60,3 +83,17 @@ PLIST
 
 codesign --force --sign - "$APP"
 echo "Built $APP"
+
+if [ "$INSTALL" = 1 ]; then
+    mkdir -p "$HOME/Applications"
+    if [ -e "$DEST" ]; then
+        # The previous build goes to the Trash, never deleted outright.
+        OLD="$HOME/.Trash/Hoardless $(date +%Y-%m-%d\ %H.%M.%S).app"
+        mv "$DEST" "$OLD"
+        echo "Moved the previous copy to the Trash: $OLD"
+    fi
+    cp -R "$APP" "$DEST"
+    codesign --verify "$DEST"
+    /System/Library/Frameworks/CoreServices.framework/Frameworks/LaunchServices.framework/Support/lsregister -f "$DEST"
+    echo "Installed $DEST"
+fi

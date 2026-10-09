@@ -8,11 +8,13 @@ Free and open source (GPL-3.0). No account, no ads, no telemetry.
 
 > **Status: in development.** The app works (scan, move or trash, duplicate finder), but there is no signed download
 > yet. To try it, build it yourself on macOS 14 or later with Xcode 16 or later installed: `scripts/build_app.sh`
-> writes `build/Hoardless.app` (Xcode 26 or later adds the layered macOS 26 icon).
+> writes `build/Hoardless.app` (Xcode 26 or later adds the layered macOS 26 icon); `scripts/build_app.sh --install`
+> also puts it in `~/Applications`, where macOS shows its icon everywhere.
 >
 > **当前状态：开发中。** App 已经能用（扫描、挪走或丢进废纸篓、查找重复文件），但还没有签名的下载版。想先试用，可以在装了
 > Xcode 16 或更新版本的 macOS 14 及以上系统上自己编译：运行 `scripts/build_app.sh`，会生成 `build/Hoardless.app`
-> （装的是 Xcode 26 或更新版本时，还会带上 macOS 26 的分层图标）。
+> （装的是 Xcode 26 或更新版本时，还会带上 macOS 26 的分层图标）；运行 `scripts/build_app.sh --install` 还会把它装到
+> `~/Applications`，从那里打开时各处都能正常显示图标。
 
 ---
 
