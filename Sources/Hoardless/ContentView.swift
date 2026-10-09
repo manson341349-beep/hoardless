@@ -18,9 +18,9 @@ struct ContentView: View {
                         Text("\(t.loadFailed): \(error)").foregroundStyle(.red)
                     } else {
                         switch model.screen {
-                        case .overview: OverviewView()
-                        case .category(let c): CategoryPage(category: c)
-                        case .duplicates: DuplicatesView()
+                        case .overview: OverviewView().readableColumn(maxHeight: 920)
+                        case .category(let c): CategoryPage(category: c).readableColumn()
+                        case .duplicates: DuplicatesView().readableColumn()
                         }
                     }
                 }
@@ -61,6 +61,14 @@ struct ContentView: View {
 }
 
 /// The overview keeps the drifting aurora; other pages get a calm wash of their own color at the top.
+extension View {
+    /// Keeps a page at a comfortable width (and the overview at a comfortable height) in a big window, centred,
+    /// while the background still fills the window.
+    func readableColumn(maxHeight: CGFloat = .infinity) -> some View {
+        frame(maxWidth: 1160, maxHeight: maxHeight).frame(maxWidth: .infinity, maxHeight: .infinity)
+    }
+}
+
 private struct PageBackground: View {
     let screen: AppModel.Screen
 
