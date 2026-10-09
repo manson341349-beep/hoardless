@@ -30,6 +30,7 @@ XinYuAi canvas "Hoardless 素材". All have a real alpha channel (checked).
 | AI models / AI 模型 | https://cdn.xinyuai.app/image/original/e3ce0cb3-4e1a-401c-a512-03c033561d0d-original.png | cube version |
 | Package caches / 软件包缓存 | https://cdn.xinyuai.app/image/original/ad15f052-56e1-440b-a391-baedb4a5ceb1-original.png | |
 | Developer tools / 开发工具 | https://cdn.xinyuai.app/image/original/314c4c16-b020-41ef-bb15-a3717cb00f74-original.png | |
+| Duplicates / 重复文件 | https://cdn.xinyuai.app/image/original/6c18d97e-9950-4f8e-98b7-a7455c17a9bf-original.png | 2026-10-09; ink background + Heavy cutout, cropped to 512 |
 
 ## Shared style / 统一风格
 
@@ -63,3 +64,36 @@ Later poses (same character, use the chosen mascot as reference) / 后续姿态�
 | AI models / AI 模型 | `A cluster of connected glowing glass spheres forming a small neural network inside a faceted crystal cube, lime green glass #a3d233.` |
 | Package caches / 软件包缓存 | `A neat stack of three rounded glass parcel boxes with soft ribbons, sky blue glass #5eb0ff.` |
 | Developer tools / 开发工具 | `A rounded terminal window block with an embossed chevron prompt symbol, no letters, violet glass #8b7bd8.` |
+| Duplicates / 重复文件 | `Two identical rounded glass file cards, one standing slightly behind the other and offset up and to the right, like a file and its exact copy. Each card has a softly folded top-right corner and two short embossed lines, no letters. Mint teal glass #4fd6c0, with a small lime green #a3d233 glow where the two cards overlap.` Rendered on flat `#0a0a0a` instead of transparent. |
+
+## App icon / App 图标 (2026-10-09)
+
+The plate is drawn in code, not by the model: `scripts/compose_app_icon.py` puts the cutout on an ink-to-deep-green
+squircle (824 px body on a 1024 canvas, Apple's grid) with a lime glow behind the acorn, clips it to the plate and
+adds the drop shadow. `scripts/build_app.sh` turns `Art/app-icon.png` into `AppIcon.icns` with `sips` and `iconutil`.
+The ink plate was chosen over a light paper plate: the cutout keeps a thin dark fur fringe that shows on light colors.
+
+底板用代码画，不让模型画：`scripts/compose_app_icon.py` 把抠好的松鼠放到墨黑渐变深绿的圆角方块上（1024 画布里 824 的主体，
+按 Apple 网格），橡果后面加青柠光晕，按底板形状裁切并加投影。打包时 `scripts/build_app.sh` 用系统自带的 `sips` 和 `iconutil`
+把 `Art/app-icon.png` 做成 `AppIcon.icns`。选墨黑底而不是浅纸色底：抠图后毛发边缘有一圈暗边，浅底上看得出来。
+
+Cutout source (mascot idle as reference image, ink background, then background removal with the Heavy model at 2048):
+抠图来源（以待机吉祥物为参考图，墨黑底出图，再用 Heavy 模型 2048 分辨率去背景）：
+
+```
+The same squirrel mascot as in the reference image, shown as a close-up head-and-shoulders portrait for an app icon:
+its face, round ears and two small front paws hugging the oversized glowing lime green #a3d233 glass acorn held in
+front of its chest, the tip of its big fluffy curled tail rising behind one shoulder. Big friendly glossy eyes, small
+smile, warm caramel fur, cream chest. Facing the viewer with a slight three-quarter turn, centered, the squirrel and
+acorn filling about 80% of the frame.
+Style: premium macOS app icon artwork, 3D render, designer vinyl toy, soft studio key light from the upper left, thin
+bright rim light, the acorn's lime glow lighting the chin and paws from below, gentle reflections. Simple bold
+silhouette that still reads at 32 px.
+Plain flat solid #0a0a0a background with no gradient, no ground shadow, no text, no letters, no logo, no frame, no
+rounded square plate, no border.
+```
+
+| Asset | URL |
+|---|---|
+| Render / 原图 | https://cdn.xinyuai.app/image/original/2f0cd0d3-71df-4364-aae7-0e3ae8dc5124-original.png |
+| Cutout / 抠图 | https://cdn.xinyuai.app/image/original/7c21750d-8ac2-4e63-853b-42adb5e671fa-original.png |

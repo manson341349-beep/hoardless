@@ -45,10 +45,7 @@ struct DuplicatesView: View {
 struct DuplicatesIcon: View {
     let size: CGFloat
     var body: some View {
-        Image(systemName: "square.on.square")
-            .font(.system(size: size * 0.62, weight: .semibold))
-            .foregroundStyle(LinearGradient(colors: [Theme.limeLight, Theme.lime], startPoint: .top, endPoint: .bottom))
-            .frame(width: size, height: size)
+        Art.image("icon-duplicates").resizable().scaledToFit().frame(width: size, height: size)
     }
 }
 

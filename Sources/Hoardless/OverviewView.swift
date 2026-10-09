@@ -180,7 +180,7 @@ private struct DuplicatesTile: View {
     var body: some View {
         Button { model.showingDuplicates = true } label: {
             HStack(spacing: 22) {
-                DuplicatesIcon(size: 96).shadow(color: Theme.lime.opacity(0.4), radius: 18, y: 10).floating()
+                DuplicatesIcon(size: 120).shadow(color: Theme.duplicates.opacity(0.45), radius: 18, y: 10).floating()
                 VStack(alignment: .leading, spacing: 6) {
                     Text(t.dupTitle).font(.headline).foregroundStyle(Theme.paper.opacity(0.88))
                     if dups.phase == .done {
@@ -196,7 +196,7 @@ private struct DuplicatesTile: View {
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .glassCard(tint: Theme.lime, lit: dups.phase == .done)
+        .glassCard(tint: Theme.duplicates, lit: dups.phase == .done)
         .disabled(model.phase == .scanning)
     }
 }

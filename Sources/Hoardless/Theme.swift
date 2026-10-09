@@ -11,6 +11,8 @@ enum Theme {
     static let limeLight = Color(hex: 0xd6f58a)
     static let warn = Color(hex: 0xffc95e)
     static let info = Color(hex: 0x5eb0ff)
+    /// The duplicates tile and its icon (mint teal glass).
+    static let duplicates = Color(hex: 0x4fd6c0)
 
     static func tint(_ category: Rule.Category) -> Color {
         switch category {

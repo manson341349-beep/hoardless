@@ -2,7 +2,7 @@
 
 Copyright © 2026 manson341349-beep. All rights reserved.
 
-The images in this folder (the Hoardless squirrel mascot and the category icons) are **not** covered by the
+The images in this folder (the Hoardless squirrel mascot, the app icon and the category icons) are **not** covered by the
 GPL-3.0 license that applies to the source code. They were made with XinYuAi (xinyuai.app).
 
 - You may use them unchanged as part of Hoardless itself, including builds and forks of Hoardless that keep
@@ -11,7 +11,7 @@ GPL-3.0 license that applies to the source code. They were made with XinYuAi (xi
   without written permission.
 - A fork that changes the name must replace these images.
 
-本文件夹里的图片（Hoardless 松鼠吉祥物和分类图标）**不适用**源代码的 GPL-3.0 许可证，版权归作者所有。
+本文件夹里的图片（Hoardless 松鼠吉祥物、App 图标和分类图标）**不适用**源代码的 GPL-3.0 许可证，版权归作者所有。
 图片使用 XinYuAi（xinyuai.app）制作。
 
 - 可以原样用在 Hoardless 本身，包括保留 Hoardless 名字的构建版本和分支。
