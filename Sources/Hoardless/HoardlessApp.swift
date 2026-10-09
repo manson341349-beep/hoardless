@@ -3,6 +3,7 @@ import SwiftUI
 
 @main
 struct HoardlessApp: App {
+    @NSApplicationDelegateAdaptor(AppDelegate.self) private var appDelegate
     @StateObject private var model = AppModel()
     @StateObject private var duplicates = DuplicateModel()
 
@@ -12,15 +13,39 @@ struct HoardlessApp: App {
     }
 
     var body: some Scene {
-        WindowGroup("Hoardless") {
+        WindowGroup("Hoardless", id: AppDelegate.mainWindowID) {
             ContentView()
                 .environmentObject(model)
                 .environmentObject(duplicates)
                 .frame(minWidth: 1000, minHeight: 680)
                 .onAppear { NSApplication.shared.activate() }
+                .modifier(RememberOpenWindow())
         }
         .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentMinSize)
         .defaultSize(width: 1080, height: 720)
+    }
+}
+
+/// Closing the window leaves the app running (the scan, and the Undo for the last move, are kept). SwiftUI does not
+/// bring the window back by itself when the Dock icon is clicked then, so this opens it again.
+final class AppDelegate: NSObject, NSApplicationDelegate {
+    static let mainWindowID = "main"
+    /// SwiftUI's own "open window" action, taken from the window when it first appears.
+    @MainActor static var openWindow: OpenWindowAction?
+
+    @MainActor
+    func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {
+        guard !flag, let open = Self.openWindow else { return true }
+        open(id: Self.mainWindowID)
+        return false
+    }
+}
+
+private struct RememberOpenWindow: ViewModifier {
+    @Environment(\.openWindow) private var openWindow
+
+    func body(content: Content) -> some View {
+        content.onAppear { AppDelegate.openWindow = openWindow }
     }
 }

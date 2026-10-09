@@ -6,10 +6,13 @@
 Free and open source (GPL-3.0). No account, no ads, no telemetry.
 免费开源（GPL-3.0）。不用注册，没有广告，不收集任何数据。
 
-> **Status: early planning.** There is no app to download yet. This repository currently holds the safety rules and the
-> app-rule database that the app will be built on.
+> **Status: in development.** The app works (scan, move or trash, duplicate finder), but there is no signed download
+> yet. To try it, build it yourself on macOS 14 or later with Xcode 16 or later installed: `scripts/build_app.sh`
+> writes `build/Hoardless.app` (Xcode 26 or later adds the layered macOS 26 icon).
 >
-> **当前状态：早期规划。** 还没有可下载的 App。仓库里目前是安全规则和应用规则库，App 会基于它们开发。
+> **当前状态：开发中。** App 已经能用（扫描、挪走或丢进废纸篓、查找重复文件），但还没有签名的下载版。想先试用，可以在装了
+> Xcode 16 或更新版本的 macOS 14 及以上系统上自己编译：运行 `scripts/build_app.sh`，会生成 `build/Hoardless.app`
+> （装的是 Xcode 26 或更新版本时，还会带上 macOS 26 的分层图标）。
 
 ---
 
@@ -22,7 +25,7 @@ Hoardless shows them clearly, explains what each one is, and lets you decide.
 本地跑 AI 很快会把硬盘塞满：Ollama、Hugging Face、LM Studio 的模型，Python 包缓存，剪辑软件的渲染缓存。
 通用清理工具要么故意跳过这些，要么当成垃圾一删了之。Hoardless 把它们列清楚、说明白，由你决定怎么处理。
 
-## What it will do / 计划功能
+## What it does / 功能
 
 - **Show** disk usage, with AI models, package caches and video caches recognised by name.
   **看清**磁盘占用，自动认出 AI 模型、包缓存、剪辑缓存。
