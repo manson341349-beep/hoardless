@@ -9,19 +9,8 @@ struct DuplicatesView: View {
 
     var body: some View {
         VStack(alignment: .leading, spacing: 14) {
-            HStack(spacing: 14) {
-                Button { model.showingDuplicates = false } label: {
-                    Label(t.back, systemImage: "chevron.left").labelStyle(.titleAndIcon)
-                }
-                .buttonStyle(.bordered)
-                .keyboardShortcut(.cancelAction)
-                DuplicatesIcon(size: 44)
-                Text(t.dupTitle).font(.title2.weight(.semibold)).foregroundStyle(Theme.paper)
-                Spacer()
-                if dups.phase == .done {
-                    Text(Bytes.text(dups.totalWasted)).font(.title2.weight(.semibold)).monospacedDigit().foregroundStyle(Theme.paper)
-                }
-            }
+            PageHeader(icon: "icon-duplicates", tint: Theme.duplicates, title: t.dupTitle,
+                       bytes: dups.phase == .done ? dups.totalWasted : nil, about: t.dupTileHint)
             switch dups.phase {
             case .setup: SetupPanel(t: t)
             case .searching: SearchingPanel(t: t)
@@ -30,7 +19,7 @@ struct DuplicatesView: View {
             if let problem = dups.problem {
                 HStack(alignment: .top) {
                     Text(problem).foregroundStyle(Color(hex: 0xff6b5e)).font(.callout).textSelection(.enabled)
-                        .fixedSize(horizontal: false, vertical: true)
+                        .lineLimit(6)
                     Spacer()
                     Button(t.gotIt) { dups.problem = nil }
                 }
@@ -38,7 +27,8 @@ struct DuplicatesView: View {
                 .background(.regularMaterial, in: RoundedRectangle(cornerRadius: 12, style: .continuous))
             }
         }
-        .padding(24)
+        .padding(.horizontal, 32)
+        .padding(.bottom, 20)
     }
 }
 
@@ -73,13 +63,12 @@ private struct SetupPanel: View {
             .padding(14)
             .background(.ultraThinMaterial, in: RoundedRectangle(cornerRadius: 16, style: .continuous))
             .overlay(RoundedRectangle(cornerRadius: 16, style: .continuous).strokeBorder(.white.opacity(0.12)))
-            Text(t.dupHowItWorks).font(.callout).foregroundStyle(Theme.dim).fixedSize(horizontal: false, vertical: true)
+            Text(t.dupHowItWorks(Bytes.text(dups.minimumSize))).font(.callout).foregroundStyle(Theme.dim).lineLimit(4)
             Spacer()
             HStack {
                 Spacer()
                 Button(t.dupStart) { dups.start(chinese: t.chinese) }
-                    .buttonStyle(.borderedProminent).tint(Theme.lime).foregroundStyle(Theme.ink)
-                    .controlSize(.large)
+                    .buttonStyle(PillButton(prominent: true))
                     .keyboardShortcut(.defaultAction)
                     .disabled(!dups.canStart)
                 Spacer()

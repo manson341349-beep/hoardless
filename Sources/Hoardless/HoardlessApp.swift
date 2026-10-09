@@ -17,13 +17,23 @@ struct HoardlessApp: App {
             ContentView()
                 .environmentObject(model)
                 .environmentObject(duplicates)
-                .frame(minWidth: 1000, minHeight: 680)
-                .onAppear { NSApplication.shared.activate() }
+                .frame(minWidth: 1040, minHeight: 700)
+                .onAppear {
+                    NSApplication.shared.activate()
+                    model.appeared()
+                }
                 .modifier(RememberOpenWindow())
         }
-        .windowStyle(.hiddenTitleBar)
         .windowResizability(.contentMinSize)
-        .defaultSize(width: 1080, height: 720)
+        .defaultSize(width: 1200, height: 780)
+        // One window: the scan, the ticks and the confirmation sheet belong to it.
+        .commands { CommandGroup(replacing: .newItem) {} }
+
+        Settings {
+            SettingsView()
+                .environmentObject(model)
+                .environmentObject(duplicates)
+        }
     }
 }
 

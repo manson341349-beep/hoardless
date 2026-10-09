@@ -1,60 +1,20 @@
 import HoardlessCore
 import SwiftUI
 
+/// Overview: the squirrel, the total, how it splits by category, and where to go next.
 struct OverviewView: View {
     @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var dups: DuplicateModel
     private var t: Strings { Strings(chinese: model.chinese) }
 
     var body: some View {
-        let summaries = model.summaries
-        Grid(horizontalSpacing: 16, verticalSpacing: 16) {
-            GridRow {
-                HeroCard()
-                CategoryTile(category: .videoEditors, summary: summaries[.videoEditors], wide: false)
-                CategoryTile(category: .aiModels, summary: summaries[.aiModels], wide: false)
-            }
-            .frame(height: 320)
-            GridRow {
-                CategoryTile(category: .packageCache, summary: summaries[.packageCache], wide: true)
-                CategoryTile(category: .devTools, summary: summaries[.devTools], wide: true)
-                DuplicatesTile()
-            }
-            .frame(maxHeight: .infinity)
-        }
-        .padding(.horizontal, 24)
-        .padding(.top, 8)
-        .padding(.bottom, 112)
-        .overlay(alignment: .bottom) {
-            ScanOrb().padding(.bottom, 14)
-        }
-        .overlay(alignment: .bottomTrailing) {
-            Text(t.readOnlyNotice).font(.caption).foregroundStyle(Theme.dim).padding(.trailing, 26).padding(.bottom, 16)
-        }
-    }
-}
-
-private struct HeroCard: View {
-    @EnvironmentObject private var model: AppModel
-    private var t: Strings { Strings(chinese: model.chinese) }
-
-    var body: some View {
-        VStack(spacing: 6) {
-            Group {
-                switch model.phase {
-                case .idle: Text(t.heroIdle)
-                case .scanning: Text(t.heroScanning)
-                case .done: CountingBytes(bytes: Double(model.totalBytes)).animation(.easeOut(duration: 0.65), value: model.totalBytes)
-                }
-            }
-            .font(.system(size: 30, weight: .semibold))
-            .foregroundStyle(Theme.paper)
-            .multilineTextAlignment(.center)
-            .transaction { $0.animation = nil }
-
+        VStack(spacing: 0) {
+            Spacer(minLength: 8)
             ZStack {
                 Art.image(mascot)
                     .resizable().scaledToFit()
-                    .frame(width: 150, height: 150)
+                    .frame(width: 168, height: 168)
+                    .shadow(color: .black.opacity(0.45), radius: 22, y: 16)
                     .floating(busy: model.phase == .scanning)
                     .id(mascot)
                     .transition(.asymmetric(insertion: .scale(scale: 0.8).combined(with: .opacity),
@@ -62,15 +22,56 @@ private struct HeroCard: View {
             }
             .animation(.spring(duration: 0.4, bounce: 0.35), value: mascot)
 
-            statusLine
-                .font(.callout)
-                .foregroundStyle(Theme.paper.opacity(0.78))
-                .multilineTextAlignment(.center)
-                .frame(minHeight: 36)
-                .transaction { $0.animation = nil }
+            Group {
+                switch model.phase {
+                case .idle:
+                    Text(t.idleTitle).font(.system(size: 40, weight: .bold))
+                    Text(t.idleHint).font(.callout).foregroundStyle(Theme.paper.opacity(0.78)).padding(.top, 8)
+                case .scanning:
+                    Text(model.currentApp.map(t.lookingAt) ?? t.scanning).font(.callout.weight(.semibold)).foregroundStyle(Theme.limeLight)
+                    CountingBytes(bytes: Double(model.totalBytes)).font(.system(size: 60, weight: .bold))
+                        .animation(.easeOut(duration: 0.3), value: model.totalBytes)
+                case .done:
+                    Text(t.scanDone).font(.callout.weight(.semibold)).foregroundStyle(Theme.limeLight)
+                    CountingBytes(bytes: Double(model.totalBytes)).font(.system(size: 60, weight: .bold))
+                        .animation(.easeOut(duration: 0.65), value: model.totalBytes)
+                    Text(t.doneParagraph(actionable: Bytes.text(model.actionableBytes), protected: Bytes.text(model.protectedBytes)))
+                        .font(.callout).foregroundStyle(Theme.paper.opacity(0.82))
+                        .multilineTextAlignment(.center).frame(maxWidth: 560).padding(.top, 8)
+                }
+            }
+            .foregroundStyle(Theme.paper)
+            .multilineTextAlignment(.center)
+            .transaction { $0.animation = nil }
+
+            if model.phase == .done {
+                SpaceBar(t: t).padding(.top, 24)
+            }
+
+            Group {
+                if model.phase == .done {
+                    HStack(spacing: 12) {
+                        if let target = bestCategory {
+                            Button(t.reviewAction(Bytes.text(model.actionableBytes))) { model.show(.category(target)) }
+                                .buttonStyle(PillButton(prominent: true)).controlSize(.large)
+                        }
+                        Button(t.rescan) { model.toggleScan() }.buttonStyle(PillButton(prominent: false))
+                            .disabled(model.working)
+                    }
+                } else {
+                    ScanOrb()
+                }
+            }
+            .padding(.top, 26)
+
+            Spacer(minLength: 16)
+            LazyVGrid(columns: Array(repeating: GridItem(.flexible(), spacing: 12), count: 4), spacing: 12) {
+                ForEach(cardCategories, id: \.self) { CategoryCard(category: $0, t: t) }
+                DuplicatesCard(t: t)
+            }
         }
-        .padding(18)
-        .glassCard(tint: Theme.lime, lit: model.phase == .done)
+        .padding(.horizontal, 40)
+        .padding(.bottom, 28)
     }
 
     private var mascot: String {
@@ -81,123 +82,120 @@ private struct HeroCard: View {
         }
     }
 
-    @ViewBuilder private var statusLine: some View {
-        switch model.phase {
-        case .idle:
-            Text(t.idleHint)
-        case .scanning:
-            Text(model.currentApp.map(t.lookingAt) ?? t.scanning)
-        case .done:
-            Text(t.doneSummary(actionable: Bytes.text(model.actionableBytes), protected: Bytes.text(model.protectedBytes)))
+    /// The three categories using the most space (all four before a scan finishes, minus developer tools).
+    private var cardCategories: [Rule.Category] {
+        let all: [Rule.Category] = [.videoEditors, .aiModels, .packageCache, .devTools]
+        guard model.phase == .done else { return Array(all.prefix(3)) }
+        return Array(all.sorted { (model.summaries[$0]?.bytes ?? 0) > (model.summaries[$1]?.bytes ?? 0) }.prefix(3))
+    }
+
+    /// Where "review what you can act on" goes: the category with the most space to act on.
+    private var bestCategory: Rule.Category? {
+        model.summaries.filter { $0.value.actionableBytes > 0 }.max { $0.value.actionableBytes < $1.value.actionableBytes }?.key
+    }
+}
+
+/// One bar split by category, with a legend under it.
+private struct SpaceBar: View {
+    @EnvironmentObject private var model: AppModel
+    let t: Strings
+
+    var body: some View {
+        let parts = [Rule.Category.videoEditors, .aiModels, .packageCache, .devTools]
+            .map { ($0, model.summaries[$0]?.bytes ?? 0) }.filter { $0.1 > 0 }
+        let total = max(parts.reduce(Int64(0)) { $0 + $1.1 }, 1)
+        VStack(spacing: 12) {
+            GeometryReader { geo in
+                HStack(spacing: 2) {
+                    ForEach(parts, id: \.0) { c, bytes in
+                        Rectangle().fill(Theme.tint(c)).frame(width: max(3, geo.size.width * CGFloat(Double(bytes) / Double(total)) - 2))
+                    }
+                }
+            }
+            .frame(width: 600, height: 14)
+            .background(.white.opacity(0.08))
+            .clipShape(Capsule())
+            .accessibilityElement()
+            .accessibilityLabel(parts.map { "\(t.category($0.0)) \(Bytes.text($0.1))" }.joined(separator: ", "))
+            HStack(spacing: 20) {
+                ForEach(parts, id: \.0) { c, bytes in
+                    HStack(spacing: 7) {
+                        Circle().fill(Theme.tint(c)).frame(width: 9, height: 9)
+                        Text("\(t.category(c)) \(Bytes.text(bytes))").font(.callout).foregroundStyle(Theme.paper.opacity(0.8))
+                    }
+                }
+            }
         }
     }
 }
 
-private struct CategoryTile: View {
+private struct CategoryCard: View {
     @EnvironmentObject private var model: AppModel
     let category: Rule.Category
-    let summary: CategorySummary?
-    let wide: Bool
-    private var t: Strings { Strings(chinese: model.chinese) }
-
-    private var lit: Bool {
-        guard model.phase != .idle, let summary else { return false }
-        return summary.isComplete
-    }
+    let t: Strings
 
     var body: some View {
-        Button { model.openCategory = category } label: {
-            Group {
-                if wide {
-                    HStack(spacing: 22) { icon(120); details }
-                } else {
-                    VStack(alignment: .leading, spacing: 8) {
-                        Text(t.category(category)).font(.headline).foregroundStyle(Theme.paper.opacity(0.88))
-                        icon(130).frame(maxWidth: .infinity)
-                        details
+        let summary = model.summaries[category]
+        Button { model.show(.category(category)) } label: {
+            HStack(spacing: 12) {
+                Art.image(Theme.icon(category)).resizable().scaledToFit().frame(width: 38, height: 38)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(t.category(category)).font(.caption).foregroundStyle(Theme.paper.opacity(0.75)).lineLimit(1)
+                    if model.phase == .done, let s = summary, s.isComplete {
+                        Text(s.bytes == 0 && s.waitingForPermission ? t.notChecked : Bytes.text(s.bytes))
+                            .font(.system(size: 18, weight: .bold)).monospacedDigit().foregroundStyle(Theme.paper)
+                        line(s).font(.caption2).lineLimit(1).minimumScaleFactor(0.8)
+                    } else {
+                        Text("—").font(.system(size: 18, weight: .bold)).foregroundStyle(Theme.dim)
                     }
                 }
+                Spacer(minLength: 0)
             }
-            .padding(18)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
-        .opacity(lit || model.phase == .idle ? 1 : 0.5)
-        .glassCard(tint: Theme.tint(category), lit: lit)
-        .disabled(model.phase == .scanning)
+        .glassCard(tint: Theme.tint(category), lit: model.phase == .done)
+        .frame(height: 78)
     }
 
-    private func icon(_ size: CGFloat) -> some View {
-        Art.image(Theme.icon(category))
-            .resizable().scaledToFit()
-            .frame(width: size, height: size)
-            .shadow(color: Theme.tint(category).opacity(0.45), radius: 18, y: 10)
-            .floating()
-    }
-
-    private var details: some View {
-        VStack(alignment: .leading, spacing: 6) {
-            if wide { Text(t.category(category)).font(.headline).foregroundStyle(Theme.paper.opacity(0.88)) }
-            sizeLine.font(.system(size: 26, weight: .semibold)).foregroundStyle(Theme.paper)
-            tags
-        }
-    }
-
-    @ViewBuilder private var sizeLine: some View {
-        if model.phase == .idle || !(summary?.isComplete ?? false) {
-            Text("—").foregroundStyle(Theme.dim)
-        } else if let summary, summary.bytes == 0, summary.waitingForPermission {
-            Text(t.notChecked).foregroundStyle(Theme.dim)
+    @ViewBuilder private func line(_ s: CategorySummary) -> some View {
+        if s.reviewBytes + s.safeBytes > 0 {
+            Text(t.canAct(Bytes.text(s.reviewBytes + s.safeBytes))).foregroundStyle(Theme.warn)
+        } else if s.commandOnlyBytes > 0 {
+            Text(t.commandOnlyAmount(Bytes.text(s.commandOnlyBytes))).foregroundStyle(Color(hex: 0x9fd0ff))
         } else {
-            CountingBytes(bytes: Double(summary?.bytes ?? 0)).animation(.easeOut(duration: 0.55), value: summary?.bytes)
+            Text(t.viewOnlyAll).foregroundStyle(Theme.dim)
         }
-    }
-
-    @ViewBuilder private var tags: some View {
-        if lit, let s = summary {
-            ViewThatFits(in: .horizontal) {
-                HStack(spacing: 6) { tagList(s) }
-                VStack(alignment: .leading, spacing: 6) { tagList(s) }
-            }
-        }
-    }
-
-    @ViewBuilder private func tagList(_ s: CategorySummary) -> some View {
-                if s.protectedBytes > 0 { Tag(text: "\(t.protected) \(Bytes.text(s.protectedBytes))", color: Theme.paper, fill: Theme.paper.opacity(0.14)) }
-                if s.reviewBytes + s.safeBytes > 0 { Tag(text: "\(t.review) \(Bytes.text(s.reviewBytes + s.safeBytes))", color: Theme.warn, fill: Theme.warn.opacity(0.18)) }
-                if s.commandOnlyBytes > 0 { Tag(text: "\(t.commandOnly) \(Bytes.text(s.commandOnlyBytes))", color: Theme.info, fill: Theme.info.opacity(0.18)) }
-                if s.waitingForPermission && s.bytes == 0 { Tag(text: t.tapToCheck, color: Theme.paper.opacity(0.85), fill: Theme.paper.opacity(0.14)) }
     }
 }
 
-/// Entry to the duplicates screen. Works on its own, before or without a scan.
-private struct DuplicatesTile: View {
+private struct DuplicatesCard: View {
     @EnvironmentObject private var model: AppModel
     @EnvironmentObject private var dups: DuplicateModel
-    private var t: Strings { Strings(chinese: model.chinese) }
+    let t: Strings
 
     var body: some View {
-        Button { model.showingDuplicates = true } label: {
-            HStack(spacing: 22) {
-                DuplicatesIcon(size: 120).shadow(color: Theme.duplicates.opacity(0.45), radius: 18, y: 10).floating()
-                VStack(alignment: .leading, spacing: 6) {
-                    Text(t.dupTitle).font(.headline).foregroundStyle(Theme.paper.opacity(0.88))
-                    if dups.phase == .done {
-                        CountingBytes(bytes: Double(dups.totalWasted)).font(.system(size: 26, weight: .semibold)).foregroundStyle(Theme.paper)
-                        Tag(text: t.dupTileFound(dups.visibleGroups.count), color: Theme.warn, fill: Theme.warn.opacity(0.18))
-                    } else {
-                        Text(t.dupTileHint).font(.callout).foregroundStyle(Theme.paper.opacity(0.75)).fixedSize(horizontal: false, vertical: true)
-                    }
+        Button { model.show(.duplicates) } label: {
+            HStack(spacing: 12) {
+                Art.image("icon-duplicates").resizable().scaledToFit().frame(width: 38, height: 38)
+                VStack(alignment: .leading, spacing: 2) {
+                    Text(t.dupTitle).font(.caption).foregroundStyle(Theme.paper.opacity(0.75))
+                    Text(dups.phase == .done ? Bytes.text(dups.totalWasted) : t.dupCardAction)
+                        .font(.system(size: 18, weight: .bold)).foregroundStyle(Theme.paper)
+                    Text(dups.phase == .done ? t.dupTileFound(dups.visibleGroups.count) : t.dupCardHint)
+                        .font(.caption2).foregroundStyle(Theme.dim).lineLimit(1).minimumScaleFactor(0.8)
                 }
+                Spacer(minLength: 0)
             }
-            .padding(18)
-            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .padding(14)
+            .frame(maxWidth: .infinity, alignment: .leading)
             .contentShape(Rectangle())
         }
         .buttonStyle(.plain)
         .glassCard(tint: Theme.duplicates, lit: dups.phase == .done)
-        .disabled(model.phase == .scanning)
+        .frame(height: 78)
     }
 }
 
@@ -216,6 +214,7 @@ struct Tag: View {
     }
 }
 
+/// The big round Scan / Stop button shown before and during a scan.
 private struct ScanOrb: View {
     @EnvironmentObject private var model: AppModel
     @Environment(\.accessibilityReduceMotion) private var reduceMotion
@@ -237,7 +236,7 @@ private struct ScanOrb: View {
                                          center: UnitPoint(x: 0.35, y: 0.28), startRadius: 0, endRadius: 60))
                     .padding(9)
                     .shadow(color: Theme.lime.opacity(scanning ? 0.85 : 0.55), radius: scanning ? 30 : 20, y: 10)
-                Text(scanning ? t.stop : (model.phase == .done ? t.rescan : t.scan))
+                Text(scanning ? t.stop : t.scan)
                     .font(.system(size: 16, weight: .semibold))
                     .foregroundStyle(Theme.ink)
             }
@@ -246,7 +245,7 @@ private struct ScanOrb: View {
         }
         .buttonStyle(OrbPress())
         .keyboardShortcut(.defaultAction)
-        .disabled(model.working != nil && model.phase != .scanning)
+        .disabled(model.working && model.phase != .scanning)
     }
 }
 

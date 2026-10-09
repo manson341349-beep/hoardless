@@ -100,6 +100,80 @@ struct Strings {
     var commandOnly: String { s("只给命令", "Command only") }
     var protected: String { s("只看", "View only") }
 
+    // MARK: sidebar, overview, category pages (2026-10-09 redesign)
+
+    var overview: String { s("总览", "Overview") }
+    var sectionSpace: String { s("空间", "Space") }
+    var sectionTools: String { s("工具", "Tools") }
+    var settings: String { s("设置", "Settings") }
+    var goBack: String { s("后退", "Back") }
+    var goForward: String { s("前进", "Forward") }
+    var scanDone: String { s("扫描完成", "Scan complete") }
+    var idleTitle: String { s("看看你的 Mac 囤了什么", "See what your Mac is hoarding") }
+    func doneParagraph(actionable: String, protected: String) -> String {
+        s("AI 工具和剪辑软件在这台 Mac 上囤了这么多。其中 \(actionable) 可以处理，\(protected) 可能有你的作品，只看不动。",
+          "That is what AI tools and video editors keep on this Mac. \(actionable) you can act on; \(protected) may hold your work and is view only.")
+    }
+    func reviewAction(_ size: String) -> String { s("查看可以处理的 \(size)", "Review the \(size) you can act on") }
+    func canAct(_ size: String) -> String { s("可处理 \(size)", "\(size) can go") }
+    func commandOnlyAmount(_ size: String) -> String { s("只给命令 \(size)", "\(size) by command") }
+    var viewOnlyAll: String { s("只看", "View only") }
+    var dupCardAction: String { s("去查找", "Find") }
+    var dupCardHint: String { s("在你选的文件夹里", "In folders you pick") }
+    func categoryAbout(_ c: Rule.Category) -> String {
+        switch c {
+        case .videoEditors: return s("剪辑软件的缓存、下载的素材和草稿。能自己重建的缓存可以放心清理；草稿和下载的素材只显示大小。",
+                                     "Video editors' caches, downloaded material and drafts. Caches they rebuild can go; drafts and downloaded material are view only.")
+        case .aiModels: return s("Hugging Face、PyTorch、Ollama 等下载的模型和缓存。需要时会重新下载；你自己训练或改过的模型只显示大小。",
+                                 "Models and caches downloaded by Hugging Face, PyTorch, Ollama and others. They download again when needed; models you made are view only.")
+        case .packageCache: return s("pip、uv、conda 等下载过的安装包。删掉后，下次安装时会重新下载。",
+                                     "Packages downloaded by pip, uv, conda and others. They download again the next time you install.")
+        case .devTools: return s("Docker 等开发工具的数据。里面可能有你的项目数据，只显示大小。",
+                                 "Data of developer tools such as Docker. It may hold project data, so it is view only.")
+        }
+    }
+    func locationsCount(_ n: Int) -> String { s("\(n) 个位置", "\(n) locations") }
+    var permissionRow: String { s("在受保护的文件夹里，macOS 会先问你", "In a protected folder; macOS asks you first") }
+    var allowAndCheck: String { s("允许并检查", "Allow and check") }
+    func selectedSummary(_ n: Int, _ size: String) -> String { s("已选 \(n) 项 · \(size)", "\(n) selected · \(size)") }
+    var pickHint: String { s("勾选要处理的项目。没有勾选框的只看不动。", "Tick what to act on. Items without a box are view only.") }
+    var undoable: String { s("确认前会列出全部路径，可撤销", "Every path is listed before anything moves; can be undone") }
+    func undoFailed(_ original: String, now: String, _ why: String) -> String {
+        s("\(original) 没能放回（\(why)）。它现在在：\(now)", "\(original) was not put back (\(why)). It is now at: \(now)")
+    }
+    func batchTrashTitle(_ n: Int, _ places: Int, _ size: String) -> String {
+        s("把 \(n) 项（\(places) 个位置，\(size)）移到废纸篓？", "Move \(n) items (\(places) places, \(size)) to the Trash?")
+    }
+    func batchMoveTitle(_ n: Int, _ places: Int, _ size: String) -> String {
+        s("把 \(n) 项（\(places) 个位置，\(size)）挪走？", "Move \(n) items (\(places) places, \(size))?")
+    }
+    var batchTrashNote: String {
+        s("不会永久删除：它们会进废纸篓，清空废纸篓之前都能放回。完成后这里会出现\u{201C}撤销\u{201D}，在你点\u{201C}知道了\u{201D}、做下一个操作或退出 App 之前有效。",
+          "Nothing is deleted permanently: they go to the Trash and can be put back until it is emptied. An Undo button appears here until you dismiss it, act again or quit.")
+    }
+    var batchMoveNote: String {
+        s("挪走后，应用会当它们已被删除，需要时重新下载。完成后这里会出现\u{201C}撤销\u{201D}，在你点\u{201C}知道了\u{201D}、做下一个操作或退出 App 之前有效。",
+          "The apps will treat them as deleted and download again when needed. An Undo button appears here until you dismiss it, act again or quit.")
+    }
+    var whatTheyAre: String { s("它们是什么", "What they are") }
+    func batchTrashed(_ n: Int, _ size: String) -> String { s("已把 \(n) 项（\(size)）移到废纸篓。", "Moved \(n) items (\(size)) to the Trash.") }
+    func batchMoved(_ n: Int, _ size: String) -> String { s("已把 \(n) 项（\(size)）挪走。", "Moved \(n) items (\(size)).") }
+
+    // MARK: settings window
+
+    var general: String { s("通用", "General") }
+    var searchTab: String { s("查找", "Finding") }
+    var about: String { s("关于", "About") }
+    var autoScan: String { s("打开 App 时自动扫描", "Scan when the app opens") }
+    var autoScanNote: String { s("只读，不会动任何文件", "Read-only; no file is changed") }
+    var askFirst: String { s("移走前一定先问我", "Always ask before removing") }
+    var askFirstNote: String { s("安全规则，不能关闭：每次挪走或丢进废纸篓都会先列出路径和大小", "A safety rule that can't be turned off: every move or trash lists the paths and sizes first") }
+    var dupMinimum: String { s("重复文件的最小大小", "Smallest duplicate to look for") }
+    var dupMinimumNote: String { s("更小的文件腾不出多少空间，还会让列表很长", "Smaller files free little space and make the list long") }
+    var version: String { s("版本", "Version") }
+    var licenseNote: String { s("免费开源（GPL-3.0）。不用注册，没有广告，不收集任何数据。图片版权保留。", "Free and open source (GPL-3.0). No account, no ads, no data collected. Artwork all rights reserved.") }
+    var sourceCode: String { s("在 GitHub 上查看源代码", "Source code on GitHub") }
+
     // MARK: duplicates
 
     var dupTitle: String { s("重复文件", "Duplicates") }
@@ -121,9 +195,9 @@ struct Strings {
         case .otherVolume: return s("\(path) 在另一个磁盘上，这里只查这台 Mac 的个人文件夹所在的磁盘。", "\(path) is on another disk; only the disk your home folder is on is searched.")
         }
     }
-    var dupHowItWorks: String {
-        s("只读查找：只比较文件内容，不改动任何东西。只找 1 MB 以上的文件；隐藏文件夹、应用包内部、Python 环境和 node_modules 不进去看。下载、桌面、文稿等文件夹第一次读取时，macOS 可能会弹窗询问。",
-          "Read-only: it only compares file contents and changes nothing. Files under 1 MB are ignored; hidden folders, app packages, Python environments and node_modules are not looked inside. macOS may ask before Downloads, Desktop or Documents is read the first time.")
+    func dupHowItWorks(_ minimum: String) -> String {
+        s("只读查找：只比较文件内容，不改动任何东西。只找 \(minimum) 以上的文件（可在设置里改）；隐藏文件夹、应用包内部、Python 环境和 node_modules 不进去看。下载、桌面、文稿等文件夹第一次读取时，macOS 可能会弹窗询问。",
+          "Read-only: it only compares file contents and changes nothing. Files under \(minimum) are ignored (change it in Settings); hidden folders, app packages, Python environments and node_modules are not looked inside. macOS may ask before Downloads, Desktop or Documents is read the first time.")
     }
     var dupStart: String { s("开始查找", "Find Duplicates") }
     func dupListing(_ n: Int) -> String { s("正在查看文件… 已看 \(n) 个", "Looking through files… \(n) so far") }

@@ -27,6 +27,11 @@ final class DuplicateModel: ObservableObject {
     @Published private(set) var working = false
     @Published private(set) var lastRecords: [ActionRecord] = []
     @Published var problem: String?
+    /// Settings › Finding: files smaller than this are ignored.
+    @Published var minimumSize: Int64 = (UserDefaults.standard.object(forKey: "dupMinimumSize") as? NSNumber)?.int64Value ?? 1_000_000 {
+        didSet { UserDefaults.standard.set(NSNumber(value: minimumSize), forKey: "dupMinimumSize") }
+    }
+    static let minimumSizeChoices: [Int64] = [1_000_000, 10_000_000, 100_000_000, 1_000_000_000]
 
     private let policy = PathPolicy()
     private let actions = FileActions()
@@ -87,7 +92,7 @@ final class DuplicateModel: ObservableObject {
         let rules = RuleLoader.bundledRulesDirectory().flatMap { try? RuleLoader.load(from: $0) } ?? []
         let environment = ProcessInfo.processInfo.environment
         let locations = rules.flatMap { policy.locations(for: $0, environment: environment).accepted }
-        let search = DuplicateSearch(roots: folders.filter(\.on).map(\.url),
+        let search = DuplicateSearch(roots: folders.filter(\.on).map(\.url), minimumSize: minimumSize,
                                      appFolders: DuplicateSearch.appFolders(for: locations, policy: policy), policy: policy)
         self.search = search
         if !search.refused.isEmpty {
