@@ -59,10 +59,15 @@ RAM "boosters", system-folder "junk", app uninstalling (for now), browser/privac
 | Hugging Face | Hugging Face model cache / Hugging Face 模型缓存 | review · 要重新下载 · command only / 只给命令 |
 | Hugging Face | Hugging Face transfer working files / Hugging Face 传输工具的工作文件 | review · 要重新下载 |
 | LM Studio | LM Studio models / LM Studio 模型 | protected · 只看 |
+| ModelScope | ModelScope models / ModelScope 魔搭模型 | review · 要重新下载 |
 | Ollama | Ollama models / Ollama 本地模型 | protected · 只看 |
 | PyTorch | PyTorch Hub cache / PyTorch Hub 缓存 | review · 要重新下载 |
+| Whisper | Whisper models / Whisper 语音模型 | review · 要重新下载 |
 | conda | conda package cache / conda 包缓存 | review · 要重新下载 · command only / 只给命令 |
+| Homebrew | Homebrew download cache / Homebrew 下载缓存 | review · 要重新下载 |
+| npm | npm cache / npm 缓存 | review · 要重新下载 |
 | pip | pip cache / pip 缓存 | review · 要重新下载 |
+| pnpm | pnpm package store / pnpm 包仓库 | review · 要重新下载 · command only / 只给命令 |
 | uv | uv cache / uv 缓存 | review · 要重新下载 · command only / 只给命令 |
 | CapCut | CapCut downloaded materials and app data / CapCut 下载的素材和应用数据 | protected · 只看 |
 | CapCut | CapCut rebuildable cache / CapCut 可重建的缓存 | review · 要重新下载 |
@@ -71,6 +76,7 @@ RAM "boosters", system-folder "junk", app uninstalling (for now), browser/privac
 | 剪映专业版 (JianyingPro) | JianyingPro rebuildable cache / 剪映专业版可重建的缓存 | review · 要重新下载 |
 | 剪映专业版 (JianyingPro) | JianyingPro drafts / 剪映专业版草稿 | protected · 只看 |
 | Docker Desktop | Docker Desktop disk / Docker Desktop 虚拟磁盘 | protected · 只看 |
+| Playwright | Playwright browsers / Playwright 浏览器 | review · 要重新下载 |
 
 Nothing is ever pre-selected. / 任何项目都不会默认勾选。
 

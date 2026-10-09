@@ -1,0 +1,41 @@
+{
+  "id": "modelscope-cache",
+  "app": "ModelScope",
+  "category": "ai-models",
+  "title": {
+    "en": "ModelScope models",
+    "zh": "ModelScope 魔搭模型"
+  },
+  "explain": {
+    "en": "Models and datasets downloaded from ModelScope. They are downloaded again when a program needs them. Your ModelScope login is kept elsewhere and is not affected.",
+    "zh": "从魔搭 ModelScope 下载的模型和数据集。程序需要时会重新下载。魔搭的登录信息存在别处，不受影响。"
+  },
+  "paths": [
+    "~/.cache/modelscope"
+  ],
+  "env_overrides": [
+    {
+      "var": "MODELSCOPE_CACHE"
+    }
+  ],
+  "safety": "review",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_source_code",
+      "url": "https://raw.githubusercontent.com/modelscope/modelscope/v1.40.2/modelscope/hub/utils/utils.py",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "official_source_code",
+      "url": "https://raw.githubusercontent.com/modelscope/modelscope/v1.40.2/modelscope/utils/file_utils.py",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "official_source_code",
+      "url": "https://pypi.org/project/modelscope-hub/0.4.6/",
+      "checked": "2026-10-10"
+    }
+  ],
+  "notes": "The whole ~/.cache/modelscope is the cache root: older SDKs write hub/, newer ones (modelscope-hub 0.4.6) models/ and datasets/. Credentials are in ~/.modelscope/credentials and downloaded skills in ~/.agents/skills (modelscope_hub/constants.py), both outside this rule. Not present on the maintainer's Mac."
+}

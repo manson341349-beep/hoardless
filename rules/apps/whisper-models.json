@@ -1,0 +1,37 @@
+{
+  "id": "whisper-models",
+  "app": "Whisper",
+  "category": "ai-models",
+  "title": {
+    "en": "Whisper models",
+    "zh": "Whisper 语音模型"
+  },
+  "explain": {
+    "en": "Speech-recognition models downloaded by OpenAI Whisper. Whisper downloads a model again the next time it is used.",
+    "zh": "OpenAI Whisper 下载的语音识别模型。下次用到时 Whisper 会重新下载。"
+  },
+  "paths": [
+    "~/.cache/whisper"
+  ],
+  "env_overrides": [
+    {
+      "var": "XDG_CACHE_HOME",
+      "subpath": "whisper"
+    }
+  ],
+  "safety": "review",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_source_code",
+      "url": "https://raw.githubusercontent.com/openai/whisper/v20250625/whisper/__init__.py",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "official_doc",
+      "url": "https://github.com/openai/whisper",
+      "checked": "2026-10-10"
+    }
+  ],
+  "notes": "load_model(download_root=...) lets a program pick its own folder; that is invisible from disk. Missing or damaged files are downloaded again (checked by SHA-256 in _download). Not present on the maintainer's Mac."
+}

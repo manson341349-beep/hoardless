@@ -1,0 +1,45 @@
+{
+  "id": "homebrew-cache",
+  "app": "Homebrew",
+  "category": "package-cache",
+  "title": {
+    "en": "Homebrew download cache",
+    "zh": "Homebrew 下载缓存"
+  },
+  "explain": {
+    "en": "Installers Homebrew has downloaded, plus its cached package index. Installed programs keep working; Homebrew downloads again what it needs next time.",
+    "zh": "Homebrew 下载过的安装包和缓存的软件列表。已经装好的程序照常能用，下次安装或升级时 Homebrew 会重新下载需要的部分。"
+  },
+  "paths": [
+    "~/Library/Caches/Homebrew"
+  ],
+  "env_overrides": [
+    {
+      "var": "HOMEBREW_CACHE"
+    }
+  ],
+  "safety": "review",
+  "official_cleanup": {
+    "command": "brew cleanup --prune all",
+    "source": "https://docs.brew.sh/Manpage"
+  },
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://docs.brew.sh/Manpage",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "official_doc",
+      "url": "https://docs.brew.sh/FAQ",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "local_observation",
+      "note": "Present on the maintainer's Mac: 2.6G, of which downloads/ 2.5G; `brew --cache` (Homebrew 7.0.8) prints this path. macOS 26.6.2.",
+      "checked": "2026-10-10"
+    }
+  ],
+  "notes": "HOMEBREW_CACHE is normally set in a shell profile, which an app opened from the Finder does not see; the default path is always scanned too."
+}

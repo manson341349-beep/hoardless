@@ -1,0 +1,56 @@
+{
+  "id": "pnpm-store",
+  "app": "pnpm",
+  "category": "package-cache",
+  "title": {
+    "en": "pnpm package store",
+    "zh": "pnpm 包仓库"
+  },
+  "explain": {
+    "en": "Every package pnpm has installed, kept once and hard-linked into each project's node_modules. Deleting it by hand frees little while projects still link to it, so Hoardless only shows pnpm's own command, which removes packages no project uses any more.",
+    "zh": "pnpm 装过的所有包，只存一份，再用硬链接放进各个项目的 node_modules。项目还连着它的时候手动删也腾不出多少空间，所以这里只给出 pnpm 自带的命令，它会删掉已经没有项目在用的包。"
+  },
+  "paths": [
+    "~/Library/pnpm/store"
+  ],
+  "env_overrides": [
+    {
+      "var": "PNPM_HOME",
+      "subpath": "store"
+    },
+    {
+      "var": "XDG_DATA_HOME",
+      "subpath": "pnpm/store"
+    }
+  ],
+  "safety": "review",
+  "official_cleanup": {
+    "command": "pnpm store prune",
+    "source": "https://pnpm.io/cli/store"
+  },
+  "command_only": true,
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://pnpm.io/settings/store",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "official_doc",
+      "url": "https://pnpm.io/cli/store",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "official_doc",
+      "url": "https://pnpm.io/faq",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "local_observation",
+      "note": "Present on the maintainer's Mac: 14G in v10 (11G), v11 (1.3G) and v3 (2.0G); `pnpm store path` (pnpm 10.20.0) prints ~/Library/pnpm/store/v10. macOS 26.6.2.",
+      "checked": "2026-10-10"
+    }
+  ],
+  "notes": "Files are hard-linked into node_modules, so du overstates what a prune frees. `pnpm store prune` only works on the store version of the pnpm that runs it; older version folders (e.g. v3) stay until removed some other way."
+}

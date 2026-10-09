@@ -1,0 +1,36 @@
+{
+  "id": "playwright-browsers",
+  "app": "Playwright",
+  "category": "dev-tools",
+  "title": {
+    "en": "Playwright browsers",
+    "zh": "Playwright 浏览器"
+  },
+  "explain": {
+    "en": "Browsers Playwright downloaded for automated tests and AI agents. Tests that use them stop working until you run `npx playwright install` again.",
+    "zh": "Playwright 为自动化测试和 AI 智能体下载的浏览器。挪走后，用到它们的测试要重新运行 `npx playwright install` 才能再用。"
+  },
+  "paths": [
+    "~/Library/Caches/ms-playwright"
+  ],
+  "env_overrides": [
+    {
+      "var": "PLAYWRIGHT_BROWSERS_PATH"
+    }
+  ],
+  "safety": "review",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://playwright.dev/docs/browsers",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "local_observation",
+      "note": "Present on the maintainer's Mac: 1.0G (chromium-1208, chromium_headless_shell-1208, firefox-1509, webkit-2248, ffmpeg-1011). macOS 26.6.2.",
+      "checked": "2026-10-10"
+    }
+  ],
+  "notes": "PLAYWRIGHT_BROWSERS_PATH=0 keeps browsers inside each project's node_modules; those are not scanned. Playwright's own uninstall command is `npx playwright uninstall --all`; it is not offered as official_cleanup because npx can fetch and run any package."
+}

@@ -1,0 +1,46 @@
+{
+  "id": "npm-cache",
+  "app": "npm",
+  "category": "package-cache",
+  "title": {
+    "en": "npm cache",
+    "zh": "npm 缓存"
+  },
+  "explain": {
+    "en": "Packages npm has downloaded. npm fetches them again when a project needs them; installed node_modules folders are not affected.",
+    "zh": "npm 下载过的包。项目需要时 npm 会重新下载，已经装好的 node_modules 不受影响。"
+  },
+  "paths": [
+    "~/.npm/_cacache"
+  ],
+  "env_overrides": [
+    {
+      "var": "NPM_CONFIG_CACHE",
+      "subpath": "_cacache"
+    }
+  ],
+  "safety": "review",
+  "official_cleanup": {
+    "command": "npm cache clean --force",
+    "source": "https://docs.npmjs.com/cli/v10/commands/npm-cache"
+  },
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "official_doc",
+      "url": "https://docs.npmjs.com/cli/v10/commands/npm-cache",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "official_doc",
+      "url": "https://docs.npmjs.com/cli/v10/using-npm/config",
+      "checked": "2026-10-10"
+    },
+    {
+      "type": "local_observation",
+      "note": "Present on the maintainer's Mac: ~/.npm/_cacache 3.9G; `npm config get cache` (npm 10.9.8) prints ~/.npm. macOS 26.6.2.",
+      "checked": "2026-10-10"
+    }
+  ],
+  "notes": "npm's docs: cache data lives in `_cacache` inside the configured `cache`, and `npm cache clean` deletes it. A `cache=` line in ~/.npmrc is not followed yet. ~/.npm/_npx (npx installs) is a separate folder this rule does not cover. npm reads npm_config_* environment variables case-insensitively (docs.npmjs.com/cli/v10/using-npm/config)."
+}

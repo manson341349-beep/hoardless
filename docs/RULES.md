@@ -116,9 +116,14 @@ and pip. They are shown read-only: Hoardless only trashes or moves a rule's own 
 Candidates found during research, **not yet verified** — good first contributions:
 调研中发现、**尚未核实**的候选，适合作为第一次贡献：
 
-Whisper (`~/.cache/whisper`), Playwright browsers (`~/Library/Caches/ms-playwright`), npm (`~/.npm`),
-Homebrew downloads (`~/Library/Caches/Homebrew`), ModelScope (`~/.cache/modelscope`), llama.cpp (`~/Library/Caches/llama.cpp`),
-Adobe Premiere Pro media cache, mamba/micromamba package cache.
+Adobe Premiere Pro media cache (`~/Library/Application Support/Adobe/Common/Media Cache Files` and `Media Cache`;
+the location can be changed in Premiere's preferences, and Adobe's help pages could not be read to confirm it),
+npx installs (`~/.npm/_npx`), pnpm metadata cache (`~/Library/Caches/pnpm`), Gradle (`~/.gradle/caches`),
+Cargo registry (`~/.cargo/registry`), mamba/micromamba package cache.
+
+Already covered elsewhere: llama.cpp's `-hf` downloads go to the Hugging Face cache (`~/.cache/huggingface/hub`,
+see `common/hf-cache.cpp`), so the `huggingface-hub` rule shows them.
+llama.cpp 用 `-hf` 下载的模型存在 Hugging Face 缓存里，已由 `huggingface-hub` 规则显示。
 
 ## Check your rule / 本地校验
 
