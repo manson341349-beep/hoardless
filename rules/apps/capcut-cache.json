@@ -3,15 +3,18 @@
   "app": "CapCut",
   "category": "video-editors",
   "title": {
-    "en": "CapCut cache",
-    "zh": "CapCut 缓存"
+    "en": "CapCut downloaded effects and music",
+    "zh": "CapCut 下载的特效和音乐"
   },
   "explain": {
-    "en": "CapCut's cache: downloaded effects, fonts, music and other temporary files. Your drafts point at files in this folder, and material no longer offered online may not come back, so for now Hoardless only shows the size.",
-    "zh": "CapCut 的缓存：下载的特效、字体、音乐和其他临时文件。你的草稿直接引用这个文件夹里的文件，已下架的素材删了可能找不回来，所以目前只显示大小。"
+    "en": "Effects, music and online materials CapCut downloaded, and CapCut's own cache folder. Your drafts point at these files, and material no longer offered online may not come back, so Hoardless only shows the size.",
+    "zh": "CapCut 下载的特效、音乐和在线素材，以及 CapCut 自己的缓存文件夹。你的草稿直接引用这些文件，已下架的素材删了可能找不回来，所以只显示大小。"
   },
   "paths": [
-    "~/Movies/CapCut/User Data/Cache",
+    "~/Movies/CapCut/User Data/Cache/effect",
+    "~/Movies/CapCut/User Data/Cache/music",
+    "~/Movies/CapCut/User Data/Cache/artistEffect",
+    "~/Movies/CapCut/User Data/Cache/onlineMaterial",
     "~/Library/Caches/com.lemon.lvoverseas"
   ],
   "safety": "protected",
@@ -24,9 +27,9 @@
     },
     {
       "type": "local_observation",
-      "note": "CapCut 8.3.0 (com.lemon.lvoverseas) on the maintainer's Mac: ~/Movies/CapCut/User Data/Cache 3.8G; ~/Library/Caches/com.lemon.lvoverseas absent. macOS 26.6.2.",
-      "checked": "2026-10-08"
+      "note": "CapCut 9.5.0 (com.lemon.lvoverseas) on the maintainer's Mac: effect 1.37 GB, music 0.24 GB, onlineMaterial 0.06 GB, artistEffect 0.02 GB inside ~/Movies/CapCut/User Data/Cache; ~/Library/Caches/com.lemon.lvoverseas absent. macOS 26.6.2.",
+      "checked": "2026-10-09"
     }
   ],
-  "notes": "The CapCut help page names ~/Library/Caches/com.lemon.lvoverseas; the ~/Movies path is from local observation only. Protected until someone confirms that drafts recover every material after the cache is removed."
+  "notes": "The CapCut help page names ~/Library/Caches/com.lemon.lvoverseas; the ~/Movies paths are from local observation only. CapCut's globalSetting has no cache-location key, so a moved cache is not followed. Only the downloaded-material folders are listed; the folders the app rebuilds are in capcut-generated-cache. Smaller Cache subfolders (ressdk_db 0.45 GB and others) are not covered yet. Not tested whether drafts recover these materials after removal, so they stay protected."
 }

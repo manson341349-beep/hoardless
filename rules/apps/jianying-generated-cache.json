@@ -1,0 +1,55 @@
+{
+  "id": "jianying-generated-cache",
+  "app": "剪映专业版 (JianyingPro)",
+  "category": "video-editors",
+  "title": {
+    "en": "JianyingPro thumbnails, waveforms and speech recognition",
+    "zh": "剪映专业版缩略图、波形和语音识别缓存"
+  },
+  "explain": {
+    "en": "Thumbnails, audio waveforms, frame images and speech-recognition results JianyingPro made for your drafts. When you open a draft again, JianyingPro remakes the thumbnails and waveforms by itself, and captions you already made stay in the draft. Running auto captions again on the same clip has to recognize the speech again.",
+    "zh": "剪映为你的草稿生成的缩略图、音频波形、画面图片和语音识别结果。再打开草稿时，缩略图和波形剪映会自己重新生成；已经做好的字幕保存在草稿里，不受影响。以后对同一段素材再点“识别字幕”，需要重新识别一遍。"
+  },
+  "paths": [
+    "~/Movies/JianyingPro/User Data/Cache/recognize",
+    "~/Movies/JianyingPro/User Data/Cache/image",
+    "~/Movies/JianyingPro/User Data/Cache/frameThumbnail",
+    "~/Movies/JianyingPro/User Data/Cache/audioWave"
+  ],
+  "app_settings": [
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "recognize"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "image"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "frameThumbnail"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "audioWave"
+    }
+  ],
+  "safety": "review",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "local_observation",
+      "note": "JianyingPro 11.5.0 on the maintainer's Mac, macOS 26.6.2: with JianyingPro quit, moved recognize (6.27 GB), image (3.75 GB), frameThumbnail (0.90 GB) and audioWave (0.71 GB) out of User Data/Cache, then opened a draft with auto captions. Captions were intact; thumbnails and waveforms were remade (under 10 MB written); recognize stayed empty. Folders were put back afterwards and matched the snapshot taken before (98,318 entries).",
+      "checked": "2026-10-09"
+    }
+  ],
+  "notes": "Tested with one draft. The draft's own files keep the captions; recognize only speeds up recognizing the same media again."
+}

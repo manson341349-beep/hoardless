@@ -3,21 +3,43 @@
   "app": "剪映专业版 (JianyingPro)",
   "category": "video-editors",
   "title": {
-    "en": "JianyingPro cache",
-    "zh": "剪映专业版缓存"
+    "en": "JianyingPro downloaded effects and music",
+    "zh": "剪映专业版下载的特效和音乐"
   },
   "explain": {
-    "en": "JianyingPro's cache: downloaded music, effects and online materials. Your drafts point at files in this folder, and material no longer offered online may not come back, so for now Hoardless only shows the size.",
-    "zh": "剪映专业版的缓存：下载的音乐、特效和在线素材。你的草稿直接引用这个文件夹里的文件，已下架的素材删了可能找不回来，所以目前只显示大小。"
+    "en": "Effects, music and online materials JianyingPro downloaded. Your drafts point at these files, and material no longer offered online may not come back, so Hoardless only shows the size.",
+    "zh": "剪映专业版下载的特效、音乐和在线素材。你的草稿直接引用这些文件，已下架的素材删了可能找不回来，所以只显示大小。"
   },
   "paths": [
-    "~/Movies/JianyingPro/User Data/Cache"
+    "~/Movies/JianyingPro/User Data/Cache/effect",
+    "~/Movies/JianyingPro/User Data/Cache/music",
+    "~/Movies/JianyingPro/User Data/Cache/artistEffect",
+    "~/Movies/JianyingPro/User Data/Cache/onlineMaterial"
   ],
   "app_settings": [
     {
       "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
       "format": "ini",
-      "key": "General.currentCachePath"
+      "key": "General.currentCachePath",
+      "subpath": "effect"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "music"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "artistEffect"
+    },
+    {
+      "file": "~/Movies/JianyingPro/User Data/Config/globalSetting",
+      "format": "ini",
+      "key": "General.currentCachePath",
+      "subpath": "onlineMaterial"
     }
   ],
   "safety": "protected",
@@ -25,9 +47,9 @@
   "evidence": [
     {
       "type": "local_observation",
-      "note": "JianyingPro 11.5.0 (com.lemon.lvpro) on the maintainer's Mac: 17G; the app's own User Data/Config/globalSetting sets currentCachePath to this folder. macOS 26.6.2.",
-      "checked": "2026-10-08"
+      "note": "JianyingPro 11.5.0 (com.lemon.lvpro) on the maintainer's Mac: effect 2.22 GB, music 0.87 GB, artistEffect 0.26 GB, onlineMaterial 0.07 GB inside User Data/Cache; the app's own User Data/Config/globalSetting sets currentCachePath to that Cache folder. macOS 26.6.2.",
+      "checked": "2026-10-09"
     }
   ],
-  "notes": "The cache folder can be moved in the app (currentCachePath in globalSetting, read via app_settings). More caches (prerender, RemuxCache) live in ~/Library/Containers/com.lemon.lvpro and are not covered. No official documentation found. Protected until someone confirms that drafts recover every material after the cache is removed; then it can become review."
+  "notes": "The cache folder can be moved in the app (currentCachePath in globalSetting, read via app_settings). Only the downloaded-material folders are listed; the folders the app rebuilds are in jianying-generated-cache. About 1.9 GB of smaller Cache subfolders (AITextTemplate, local_models, prerender, ressdk_db and dozens of tiny ones) are not covered by any rule yet. More caches (prerender, RemuxCache) live in ~/Library/Containers/com.lemon.lvpro and are not covered. No official documentation found. Not tested whether drafts recover these materials after removal, so they stay protected."
 }

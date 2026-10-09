@@ -1,0 +1,29 @@
+{
+  "id": "capcut-generated-cache",
+  "app": "CapCut",
+  "category": "video-editors",
+  "title": {
+    "en": "CapCut thumbnails, waveforms and speech recognition",
+    "zh": "CapCut 缩略图、波形和语音识别缓存"
+  },
+  "explain": {
+    "en": "Thumbnails, audio waveforms, frame images and speech-recognition results CapCut made for your drafts. When you open a draft again, CapCut remakes the thumbnails and waveforms by itself, and captions you already made stay in the draft. Running auto captions again on the same clip has to recognize the speech again.",
+    "zh": "CapCut 为你的草稿生成的缩略图、音频波形、画面图片和语音识别结果。再打开草稿时，缩略图和波形 CapCut 会自己重新生成；已经做好的字幕保存在草稿里，不受影响。以后对同一段素材再做自动字幕，需要重新识别一遍。"
+  },
+  "paths": [
+    "~/Movies/CapCut/User Data/Cache/recognize",
+    "~/Movies/CapCut/User Data/Cache/image",
+    "~/Movies/CapCut/User Data/Cache/frameThumbnail",
+    "~/Movies/CapCut/User Data/Cache/audioWave"
+  ],
+  "safety": "review",
+  "status": "verified",
+  "evidence": [
+    {
+      "type": "local_observation",
+      "note": "CapCut 9.5.0 on the maintainer's Mac, macOS 26.6.2: with CapCut quit, moved recognize, image, frameThumbnail and audioWave (1.63 GB together) out of User Data/Cache, then opened a draft with 30 text clips. Captions were intact; thumbnails and waveforms were remade (about 29 MB written); recognize stayed empty. Folders were put back afterwards and matched the snapshot taken before (48,923 entries).",
+      "checked": "2026-10-09"
+    }
+  ],
+  "notes": "Tested with one draft. CapCut's globalSetting has no cache-location key, so a moved cache is not followed."
+}
