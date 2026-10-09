@@ -31,6 +31,8 @@ public enum ActionError: Error, Equatable, Sendable {
     case trashNoLocation
     /// A move across drives stopped part way: the original was kept, a partial copy is at `leftover`.
     case partialMove(leftover: String, message: String)
+    /// Trashing this duplicate would leave no unchanged copy of the file.
+    case noCopyLeft
     case failed(String)
 }
 

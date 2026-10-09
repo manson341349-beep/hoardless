@@ -4,6 +4,7 @@ import SwiftUI
 @main
 struct HoardlessApp: App {
     @StateObject private var model = AppModel()
+    @StateObject private var duplicates = DuplicateModel()
 
     init() {
         // Needed when launched as a bare executable (swift run); harmless inside a .app.
@@ -14,6 +15,7 @@ struct HoardlessApp: App {
         WindowGroup("Hoardless") {
             ContentView()
                 .environmentObject(model)
+                .environmentObject(duplicates)
                 .frame(minWidth: 1000, minHeight: 680)
                 .onAppear { NSApplication.shared.activate() }
         }

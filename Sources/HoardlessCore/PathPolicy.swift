@@ -125,7 +125,7 @@ public struct PathPolicy: Sendable {
 
 extension PathPolicy {
     /// "/Users/me/x" -> "~/x" for display; other paths unchanged.
-    func tilde(_ url: URL) -> String {
+    public func tilde(_ url: URL) -> String {
         guard let rel = relativeComponents(url.standardizedFileURL), !rel.isEmpty else { return url.path }
         let homeCount = home.pathComponents.count
         return "~/" + url.standardizedFileURL.pathComponents.dropFirst(homeCount).joined(separator: "/")

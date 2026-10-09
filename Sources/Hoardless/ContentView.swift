@@ -11,6 +11,9 @@ struct ContentView: View {
             AuroraBackground()
             if let error = model.loadError {
                 Text("\(t.loadFailed): \(error)").foregroundStyle(.red)
+            } else if model.showingDuplicates {
+                DuplicatesView()
+                    .transition(.asymmetric(insertion: .scale(scale: 0.96).combined(with: .opacity), removal: .opacity))
             } else if let category = model.openCategory {
                 CategoryDetail(category: category)
                     .transition(.asymmetric(insertion: .scale(scale: 0.96).combined(with: .opacity), removal: .opacity))
@@ -20,6 +23,7 @@ struct ContentView: View {
             }
         }
         .animation(.spring(duration: 0.35), value: model.openCategory)
+        .animation(.spring(duration: 0.35), value: model.showingDuplicates)
         .overlay {
             Picker(t.language, selection: $model.language) {
                 Text(t.languageAuto).tag(AppModel.Language.system)

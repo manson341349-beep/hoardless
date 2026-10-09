@@ -12,6 +12,11 @@ never costs a user their files.
 3. **User space only.** Rules may only point inside the user's home folder (`~/...`). No `/Library`, `/System`, `/private`, no privileged helper, no admin prompt.
 4. **`protected` means show only.** A rule with `safety: "protected"` must never offer an action. Nothing is ever pre-selected, whatever its level. A rule with `command_only: true` is never trashed or moved by Hoardless; show its `official_cleanup` command instead. Showing an `official_cleanup` command (on any rule, including `protected`) is read-only text with a "deletes permanently" warning, not an action.
 5. **Never follow symlinks out of a rule's root**, and never act on a path that is not exactly a rule path or inside one.
+   The one exception is the duplicate finder (approved by the maintainer on 2026-10-09): it may move a duplicate copy to the
+   Trash (never move it elsewhere, never hard-delete) only when the user picked that copy, it is inside a folder the user chose
+   to search (inside home, not Library or the Trash), at least one unchanged copy of the same content stays, and it is not
+   inside an app's data (any folder of an app a rule knows, "User Data", a cache, a hidden folder), a code repository,
+   a Python environment or node_modules, and is not hard-linked. All of this is re-checked on disk right before trashing.
 6. **No telemetry, no network calls** except the update check the user can turn off. No accounts, no ads, no upsell.
 7. **Respect overrides, within rules 3 and 5.** `env_overrides` is ordered: the first variable that is set wins, and the location is its value plus `subpath`. Use it only if the resolved real path (symlinks resolved) is inside the home folder and passes the same checks as a rule path in `scripts/validate_rules.py`; otherwise show the location and size read-only. Say in the UI when an override is in effect. Locations read from `app_settings` follow the same checks, and like env overrides they are shown read-only: only a rule's own path can be trashed or moved. The rule's own `paths` are always scanned too when they exist, so a legacy or stale folder is never hidden. Rules 3 and 5 always win.
 

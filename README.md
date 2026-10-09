@@ -26,8 +26,8 @@ Hoardless shows them clearly, explains what each one is, and lets you decide.
 
 - **Show** disk usage, with AI models, package caches and video caches recognised by name.
   **看清**磁盘占用，自动认出 AI 模型、包缓存、剪辑缓存。
-- **Find duplicates** among large files across your home folder. A copy can be moved or trashed only if it sits in a folder Hoardless knows is safe to touch; anywhere else it is shown with its size only.
-  **找重复**的大文件（整个用户目录范围内）。只有位于 Hoardless 确认可以动的文件夹里的副本才能挪走或丢进废纸篓，其他位置的只显示大小。
+- **Find duplicates** (files of 1 MB or more with exactly the same content) in folders you pick. You tick the copies to send to the Trash; one copy of each file always stays. Copies inside an app's own data, a code repository or a Python environment are shown, never touched.
+  **找重复**：在你选的文件夹里找内容完全相同、1 MB 以上的文件。由你勾选要丢进废纸篓的副本，每个文件至少留一份。应用自己的数据、代码仓库、Python 环境里的副本只显示，不动。
 - **Move or trash** what you pick — to an external drive, an archive folder, or the Trash.
   **挪走或丢进废纸篓**：移到外置硬盘、归档文件夹，或废纸篓。
 

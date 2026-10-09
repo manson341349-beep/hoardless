@@ -16,7 +16,8 @@ struct OverviewView: View {
             .frame(height: 320)
             GridRow {
                 CategoryTile(category: .packageCache, summary: summaries[.packageCache], wide: true)
-                CategoryTile(category: .devTools, summary: summaries[.devTools], wide: true).gridCellColumns(2)
+                CategoryTile(category: .devTools, summary: summaries[.devTools], wide: true)
+                DuplicatesTile()
             }
             .frame(maxHeight: .infinity)
         }
@@ -167,6 +168,36 @@ private struct CategoryTile: View {
                 if s.reviewBytes + s.safeBytes > 0 { Tag(text: "\(t.review) \(Bytes.text(s.reviewBytes + s.safeBytes))", color: Theme.warn, fill: Theme.warn.opacity(0.18)) }
                 if s.commandOnlyBytes > 0 { Tag(text: "\(t.commandOnly) \(Bytes.text(s.commandOnlyBytes))", color: Theme.info, fill: Theme.info.opacity(0.18)) }
                 if s.waitingForPermission && s.bytes == 0 { Tag(text: t.tapToCheck, color: Theme.paper.opacity(0.85), fill: Theme.paper.opacity(0.14)) }
+    }
+}
+
+/// Entry to the duplicates screen. Works on its own, before or without a scan.
+private struct DuplicatesTile: View {
+    @EnvironmentObject private var model: AppModel
+    @EnvironmentObject private var dups: DuplicateModel
+    private var t: Strings { Strings(chinese: model.chinese) }
+
+    var body: some View {
+        Button { model.showingDuplicates = true } label: {
+            HStack(spacing: 22) {
+                DuplicatesIcon(size: 96).shadow(color: Theme.lime.opacity(0.4), radius: 18, y: 10).floating()
+                VStack(alignment: .leading, spacing: 6) {
+                    Text(t.dupTitle).font(.headline).foregroundStyle(Theme.paper.opacity(0.88))
+                    if dups.phase == .done {
+                        CountingBytes(bytes: Double(dups.totalWasted)).font(.system(size: 26, weight: .semibold)).foregroundStyle(Theme.paper)
+                        Tag(text: t.dupTileFound(dups.visibleGroups.count), color: Theme.warn, fill: Theme.warn.opacity(0.18))
+                    } else {
+                        Text(t.dupTileHint).font(.callout).foregroundStyle(Theme.paper.opacity(0.75)).fixedSize(horizontal: false, vertical: true)
+                    }
+                }
+            }
+            .padding(18)
+            .frame(maxWidth: .infinity, maxHeight: .infinity, alignment: .leading)
+            .contentShape(Rectangle())
+        }
+        .buttonStyle(.plain)
+        .glassCard(tint: Theme.lime, lit: dups.phase == .done)
+        .disabled(model.phase == .scanning)
     }
 }
 

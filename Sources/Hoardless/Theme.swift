@@ -52,7 +52,12 @@ enum Art {
 }
 
 enum Bytes {
-    static func text(_ bytes: Int64) -> String {
-        ByteCountFormatter.string(fromByteCount: bytes, countStyle: .file)
-    }
+    private static let formatter: ByteCountFormatter = {
+        let f = ByteCountFormatter()
+        f.countStyle = .file
+        f.allowsNonnumericFormatting = false  // "0 KB", not "Zero KB"
+        return f
+    }()
+
+    static func text(_ bytes: Int64) -> String { bytes == 0 ? "0 KB" : formatter.string(fromByteCount: bytes) }
 }

@@ -11,6 +11,7 @@ final class AppModel: ObservableObject {
     @Published private(set) var currentApp: String?
     @Published private(set) var loadError: String?
     @Published var openCategory: Rule.Category?
+    @Published var showingDuplicates = false
 
     enum Language: String, CaseIterable { case system, chinese, english }
 
