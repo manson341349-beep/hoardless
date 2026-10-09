@@ -156,6 +156,7 @@ final class AppModel: ObservableObject {
         let result: RuleResult
         var id: String { location.id }
         var bytes: Int64 { result.states[location.id]?.bytes ?? 0 }
+        var batchItem: BatchItem { BatchItem(ruleID: result.id, location: location) }
     }
 
     enum PendingAction: Identifiable {
@@ -189,7 +190,7 @@ final class AppModel: ObservableObject {
 
     /// The locations of a rule that may be trashed or moved right now.
     func actionable(_ result: RuleResult) -> [Location] {
-        result.locations.filter { canAct($0, in: result) }
+        busy ? [] : actions.actionable(result)
     }
 
     /// Whether the rule has locations that could be acted on once no scan or action is running (for showing a
@@ -214,8 +215,10 @@ final class AppModel: ObservableObject {
 
     /// Ticked locations on one category's page, re-checked against the latest scan.
     func selectedItems(in category: Rule.Category) -> [Item] {
-        results.filter { $0.rule.category == category }.flatMap { r in
-            actionable(r).filter { selection.contains($0.id) }.map { Item(location: $0, result: r) }
+        guard !busy else { return [] }
+        let page = results.filter { $0.rule.category == category }
+        return actions.items(for: selection, in: page).compactMap { item in
+            page.first(where: { $0.id == item.ruleID }).map { Item(location: item.location, result: $0) }
         }
     }
 
@@ -236,7 +239,7 @@ final class AppModel: ObservableObject {
         panel.prompt = Strings(chinese: chinese).chooseFolder
         panel.message = Strings(chinese: chinese).chooseFolderMessage
         guard panel.runModal() == .OK, let folder = panel.url else { return }
-        guard items.allSatisfy({ plannedTarget($0, in: folder) != nil }) else {
+        guard actions.plannedTargets(items.map(\.batchItem), in: results, folder: folder) != nil else {
             actionError = Strings(chinese: chinese).actionFailed(ActionError.badDestination(.notAllowedPlace))
             return
         }
@@ -250,35 +253,25 @@ final class AppModel: ObservableObject {
         pending = nil
         guard !working, phase != .scanning else { return }
         let current = results
-        let jobs: [(Location, RuleResult)] = action.items.compactMap { item in
-            current.first(where: { $0.id == item.result.id }).map { (item.location, $0) }
+        let items = action.items.map(\.batchItem)
+        let kind: BatchKind
+        switch action {
+        case .trash: kind = .trash
+        case .move(_, let folder): kind = .move(to: folder)
         }
         working = true
         actionError = nil
         let actions = self.actions
         let t = Strings(chinese: chinese)
         Task {
-            let outcomes: [(Location, RuleResult, Result<ActionRecord, Error>)] = await Task.detached(priority: .userInitiated) {
-                jobs.map { loc, result in
-                    switch action {
-                    case .trash: return (loc, result, Result { try actions.trash(loc, of: result) })
-                    case .move(_, let dest): return (loc, result, Result { try actions.move(loc, of: result, to: dest) })
-                    }
-                }
-            }.value
+            let outcome = await Task.detached(priority: .userInitiated) { actions.run(kind, items, in: current) }.value
             working = false
-            var records: [ActionRecord] = [], failures: [String] = []
-            for (loc, _, outcome) in outcomes {
-                switch outcome {
-                case .success(let record):
-                    update(record.ruleID, record.locationID, .missing)
-                    selection.remove(record.locationID)
-                    records.append(record)
-                case .failure(let error):
-                    failures.append("\(loc.display): \(t.actionFailed(error))")
-                }
+            for record in outcome.records {
+                update(record.ruleID, record.locationID, .missing)
+                selection.remove(record.locationID)
             }
-            if !records.isEmpty { lastRecords = records }
+            lastRecords = UndoHistory.after(outcome, previous: lastRecords)
+            let failures = outcome.failures.map { "\($0.location.display): \(t.actionFailed($0.error))" }
             if !failures.isEmpty { actionError = failures.joined(separator: "\n") }
         }
     }
@@ -291,21 +284,15 @@ final class AppModel: ObservableObject {
         let actions = self.actions
         let t = Strings(chinese: chinese)
         Task {
-            let outcomes = await Task.detached { records.reversed().map { r in (r, Result { try actions.undo(r) }) } }.value
-            var failures: [String] = [], notUndone: [ActionRecord] = []
-            for (record, outcome) in outcomes {
-                switch outcome {
-                case .success:
-                    if let r = results.first(where: { $0.id == record.ruleID }), let loc = r.locations.first(where: { $0.id == record.locationID }) {
-                        await measure(loc, ruleID: r.id)
-                    }
-                case .failure(let error):
-                    notUndone.append(record)
-                    failures.append(t.undoFailed(record.original.path, now: record.now.path, t.actionFailed(error)))
+            let outcome = await Task.detached { actions.undoAll(records) }.value
+            for record in outcome.restored {
+                if let r = results.first(where: { $0.id == record.ruleID }), let loc = r.locations.first(where: { $0.id == record.locationID }) {
+                    await measure(loc, ruleID: r.id)
                 }
             }
+            let failures = outcome.failed.map { t.undoFailed($0.record.original.path, now: $0.record.now.path, t.actionFailed($0.error)) }
             // Still busy until here, so no other action can start while the restored folders are measured.
-            lastRecords = notUndone.reversed()
+            lastRecords = UndoHistory.after(outcome)
             working = false
             if !failures.isEmpty { actionError = failures.joined(separator: "\n") }
         }
