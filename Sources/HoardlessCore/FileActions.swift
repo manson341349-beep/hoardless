@@ -125,6 +125,16 @@ public struct FileActions: Sendable {
         } catch {
             throw ActionError.failed(error.localizedDescription)
         }
+        if record.kind == .moved { Self.removeEmptyMoveFolders(after: record) }
+    }
+
+    /// After a move is put back, removes the "Hoardless/<rule id>" folders the move made, but only while they are
+    /// empty: rmdir cannot remove a folder that holds anything (another moved item, a file of the user's) or a link.
+    private static func removeEmptyMoveFolders(after record: ActionRecord) {
+        let ruleFolder = record.now.deletingLastPathComponent()
+        let hoardless = ruleFolder.deletingLastPathComponent()
+        guard ruleFolder.lastPathComponent == record.ruleID, hoardless.lastPathComponent == "Hoardless" else { return }
+        if rmdir(ruleFolder.path) == 0 { _ = rmdir(hoardless.path) }
     }
 
     // MARK: checks

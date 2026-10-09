@@ -238,12 +238,30 @@ final class AppModel: ObservableObject {
         panel.allowsMultipleSelection = false
         panel.prompt = Strings(chinese: chinese).chooseFolder
         panel.message = Strings(chinese: chinese).chooseFolderMessage
-        guard panel.runModal() == .OK, let folder = panel.url else { return }
-        guard actions.plannedTargets(items.map(\.batchItem), in: results, folder: folder) != nil else {
-            actionError = Strings(chinese: chinese).actionFailed(ActionError.badDestination(.notAllowedPlace))
+        panel.directoryURL = startFolderForMove()
+        let batch = items.map(\.batchItem), current = results, actions = self.actions
+        let refusal = Strings(chinese: chinese).actionFailed(ActionError.badDestination(.notAllowedPlace))
+        // Checked when "Move here" is clicked, so a folder that can't be used keeps the panel open with the reason.
+        let validator = MoveFolderValidator { actions.plannedTargets(batch, in: current, folder: $0) == nil ? refusal : nil }
+        panel.delegate = validator
+        let answer = withExtendedLifetime(validator) { panel.runModal() }
+        guard answer == .OK, let folder = panel.url else { return }
+        guard actions.plannedTargets(batch, in: current, folder: folder) != nil else {
+            actionError = refusal
             return
         }
+        UserDefaults.standard.set(folder.path, forKey: "lastMoveFolder")
         pending = .move(items, folder)
+    }
+
+    /// The folder the last move went to if it still exists, otherwise Documents (never the home folder itself, which
+    /// can't be used).
+    private func startFolderForMove() -> URL {
+        if let last = UserDefaults.standard.string(forKey: "lastMoveFolder") {
+            var isDir: ObjCBool = false
+            if FileManager.default.fileExists(atPath: last, isDirectory: &isDir), isDir.boolValue { return URL(fileURLWithPath: last) }
+        }
+        return FileManager.default.homeDirectoryForCurrentUser.appendingPathComponent("Documents")
     }
 
     /// Acts on each item in turn. Each one is checked again by FileActions right before it changes; one that fails
@@ -312,5 +330,20 @@ final class AppModel: ObservableObject {
     func copy(_ text: String) {
         NSPasteboard.general.clearContents()
         NSPasteboard.general.setString(text, forType: .string)
+    }
+}
+
+/// Refuses a folder in the Move panel itself: the panel shows the reason and stays open.
+private final class MoveFolderValidator: NSObject, NSOpenSavePanelDelegate {
+    private let problem: (URL) -> String?
+
+    init(problem: @escaping (URL) -> String?) {
+        self.problem = problem
+    }
+
+    func panel(_ sender: Any, validate url: URL) throws {
+        if let message = problem(url) {
+            throw NSError(domain: "Hoardless", code: 1, userInfo: [NSLocalizedDescriptionKey: message])
+        }
     }
 }

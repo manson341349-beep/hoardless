@@ -258,6 +258,32 @@ final class FileActionsTests: XCTestCase {
         XCTAssertEqual((try fm.attributesOfItem(atPath: record.now.appendingPathComponent("sub/x.bin").path)[.size] as? Int), 70_000)
         try actions.undo(record)
         XCTAssertTrue(fm.fileExists(atPath: dir.appendingPathComponent("sub/x.bin").path))
+        XCTAssertTrue(fm.fileExists(atPath: drive.appendingPathComponent("Hoardless/r/a").path), "what was already there stays")
+    }
+
+    func testUndoOfAMoveRemovesOnlyTheEmptyFoldersItMade() async throws {
+        try write(home.appendingPathComponent(".cache/a/x.bin"))
+        let drive = home.appendingPathComponent("Drive")
+        try fm.createDirectory(at: drive, withIntermediateDirectories: true)
+        let result = await scanned(try rule(paths: ["~/.cache/a"]))
+        let record = try actions.move(result.locations[0], of: result, to: drive)
+        try actions.undo(record)
+        XCTAssertFalse(fm.fileExists(atPath: drive.appendingPathComponent("Hoardless").path))
+        XCTAssertTrue(fm.fileExists(atPath: drive.path), "the folder the user picked stays")
+
+        // A file of the user's next to the rule folder keeps "Hoardless"; a file inside keeps both.
+        let again = await scanned(try rule(paths: ["~/.cache/a"]))
+        let second = try actions.move(again.locations[0], of: again, to: drive)
+        try write(drive.appendingPathComponent("Hoardless/notes.txt"), bytes: 10)
+        try actions.undo(second)
+        XCTAssertFalse(fm.fileExists(atPath: drive.appendingPathComponent("Hoardless/r").path))
+        XCTAssertTrue(fm.fileExists(atPath: drive.appendingPathComponent("Hoardless/notes.txt").path))
+        let third = await scanned(try rule(paths: ["~/.cache/a"]))
+        let moved = try actions.move(third.locations[0], of: third, to: drive)
+        try write(drive.appendingPathComponent("Hoardless/r/mine.txt"), bytes: 10)
+        try actions.undo(moved)
+        XCTAssertTrue(fm.fileExists(atPath: drive.appendingPathComponent("Hoardless/r/mine.txt").path))
+        XCTAssertTrue(fm.fileExists(atPath: home.appendingPathComponent(".cache/a/x.bin").path))
     }
 
     func testMoveRefusesUnsafeDestinations() async throws {
