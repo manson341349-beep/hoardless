@@ -1,6 +1,7 @@
 """Remakes Sources/Hoardless/Resources/Art/app-icon.png: a squircle plate (824 px on a 1024 canvas, Apple's grid)
 with the mascot cutout, clipped to the plate. Needs Pillow. Usage: python3 compose_app_icon.py <cutout.png>
 Writes icon-A-ink.png (the one in use), icon-B-paper.png and preview-sizes.png in the current folder.
+With --layers <folder>, writes the layers of the Liquid Glass icon (icon/AppIcon.icon) instead.
 The cutout is described in docs/design/asset-prompts.md (App icon)."""
 import sys, math
 from PIL import Image, ImageDraw, ImageFilter, ImageChops
@@ -91,9 +92,34 @@ def preview(icons, labels, out):
             y += row_h
     sheet.save(out)
 
+def layers(cut_path, out_dir):
+    """The two image layers of icon/AppIcon.icon. On the layered icon the whole 1024 canvas is the icon shape (the
+    system adds the margin, rounding and shadow), so the mascot is smaller than on the flat icon."""
+    cut = Image.open(cut_path).convert("RGBA")
+    cut = cut.crop(cut.getchannel("A").getbbox())
+    target_w = int(W * 0.78)
+    h = int(cut.height * target_w / cut.width)
+    cut = cut.resize((target_w, h), Image.LANCZOS)
+    squirrel = Image.new("RGBA", (W, W), (0, 0, 0, 0))
+    squirrel.alpha_composite(cut, ((W - target_w) // 2 + int(W * 0.01), W - h + int(W * 0.03)))
+    squirrel.save(f"{out_dir}/squirrel.png")
+    glow = Image.new("L", (W, W), 0)
+    d = ImageDraw.Draw(glow)
+    cx, cy, r = int(W * 0.36), int(W * 0.70), int(W * 0.42)
+    d.ellipse((cx - r, cy - r, cx + r, cy + r), fill=150)
+    glow = glow.filter(ImageFilter.GaussianBlur(W * 0.12))
+    g = Image.new("RGBA", (W, W), (0xa3, 0xd2, 0x33, 0))
+    g.putalpha(glow)
+    g.save(f"{out_dir}/glow.png")
+
+
 if __name__ == "__main__":
+    if len(sys.argv) == 4 and sys.argv[2] == "--layers":
+        layers(sys.argv[1], sys.argv[3])
+        sys.exit(0)
     if len(sys.argv) != 2:
-        sys.exit("Usage: python3 compose_app_icon.py <cutout.png>")
+        sys.exit("Usage: python3 compose_app_icon.py <cutout.png>            (flat icon, fallback for older Xcode)\n"
+                 "       python3 compose_app_icon.py <cutout.png> --layers icon/AppIcon.icon/Assets")
     cut = sys.argv[1]
     a = icon(cut, "ink", "icon-A-ink.png")
     b = icon(cut, "paper", "icon-B-paper.png")

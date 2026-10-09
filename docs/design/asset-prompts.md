@@ -68,6 +68,23 @@ Later poses (same character, use the chosen mascot as reference) / 后续姿态�
 
 ## App icon / App 图标 (2026-10-09)
 
+**Layered Liquid Glass icon (macOS 26).** `icon/AppIcon.icon` is an Icon Composer document: the ink-to-deep-green
+gradient is the icon's fill, then a lime glow layer and the squirrel layer (glass on, specular on, neutral shadow). The
+system draws the shape, margin and shadow and makes the dark, clear and tinted versions itself. Make the layers with
+`python3 scripts/compose_app_icon.py <cutout.png> --layers icon/AppIcon.icon/Assets`; preview with
+`"/Applications/Xcode.app/Contents/Applications/Icon Composer.app/Contents/Executables/ictool" "$PWD/icon/AppIcon.icon"
+--export-image --output-file out.png --platform macOS --rendition Default --width 512 --height 512 --scale 1`
+(renditions: Default, Dark, ClearLight, ClearDark, TintedLight, TintedDark). `scripts/build_app.sh` compiles it with
+`actool` (Xcode 26+; paths must be absolute) into `Assets.car`, which also holds flattened images for macOS 14 and 15.
+Without that Xcode it falls back to the flat icon below.
+
+**分层液态玻璃图标（macOS 26）。** `icon/AppIcon.icon` 是 Icon Composer 文档：墨黑到深绿的渐变是图标底色，上面是青柠光晕层和松鼠层
+（松鼠开玻璃和高光，中性投影）。形状、留边、投影以及深色/透明/着色版本由系统生成。图层用上面的 `--layers` 命令生成，用 `ictool` 预览。
+打包时 `scripts/build_app.sh` 用 Xcode 26 以上的 `actool` 编译成 `Assets.car`（路径必须是绝对路径），里面也带给 macOS 14、15 用的压平图；
+没有这个版本的 Xcode 时退回到下面的平面图标。
+
+**Flat icon (fallback) / 平面图标（备用）**
+
 The plate is drawn in code, not by the model: `scripts/compose_app_icon.py` puts the cutout on an ink-to-deep-green
 squircle (824 px body on a 1024 canvas, Apple's grid) with a lime glow behind the acorn, clips it to the plate and
 adds the drop shadow. `scripts/build_app.sh` turns `Art/app-icon.png` into `AppIcon.icns` with `sips` and `iconutil`.
