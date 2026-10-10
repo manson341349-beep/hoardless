@@ -189,4 +189,48 @@ final class BatchActionsTests: XCTestCase {
         XCTAssertEqual(undo.restored.count, 2)
         XCTAssertTrue(exists(".cache/a/x.bin") && exists(".cache/b/x.bin"))
     }
+    // MARK: audit 2026-10-10
+
+    func testALocationHoldingAnotherOneIsNotActionable() async throws {
+        try write(".foo/cache/x.bin")
+        try write(".foo/cache/models/m.bin")
+        let results = await scanned([try rule("outer", paths: ["~/.foo/cache"]), try rule("inner", "protected", paths: ["~/.foo/cache/models"])])
+        let outer = try XCTUnwrap(results.first { $0.id == "outer" })
+        XCTAssertTrue(actions.actionable(outer).count == 1, "on its own it could be acted on")
+        XCTAssertTrue(actions.actionable(outer, among: results).isEmpty, "but not while a protected location sits inside")
+        XCTAssertTrue(actions.items(for: everything(results), in: results).isEmpty)
+        let forced = [BatchItem(ruleID: "outer", location: outer.locations[0])]
+        let outcome = actions.run(.trash, forced, in: results)
+        XCTAssertEqual(outcome.failures.map(\.error), [.holdsOtherLocation("~/.foo/cache/models")])
+        XCTAssertTrue(exists(".foo/cache/models/m.bin"))
+    }
+
+    func testMoveIntoAnotherAppsDataFolderIsRefused() async throws {
+        try write(".cache/a/x.bin")
+        try write("Movies/Editor/User Data/Cache/image/i.bin")
+        try write("Movies/Editor/Exports/e.bin")
+        let results = await scanned([try rule("a", paths: ["~/.cache/a"]), try rule("editor", paths: ["~/Movies/Editor/User Data/Cache/image"])])
+        let items = actions.items(for: [home.appendingPathComponent(".cache/a").path], in: results)
+        XCTAssertEqual(items.count, 1)
+        for rel in ["Movies/Editor/User Data/Cache/image", "Movies/Editor/Exports"] {
+            let folder = home.appendingPathComponent(rel)
+            XCTAssertNil(actions.plannedTargets(items, in: results, folder: folder), rel)
+            XCTAssertEqual(actions.run(.move(to: folder), items, in: results).failures.map(\.error), [.badDestination(.insideAppData)], rel)
+        }
+        XCTAssertTrue(exists(".cache/a/x.bin"))
+    }
+
+    func testHiddenCacheAndUserDataFoldersAreRefusedAsDestinations() async throws {
+        try write(".cache/a/x.bin")
+        let results = await scanned([try rule("a", paths: ["~/.cache/a"])])
+        let items = actions.items(for: everything(results), in: results)
+        for rel in ["Stuff/.hidden", "Stuff/Caches", "Stuff/Some App/User Data", "Stuff/cache/deep"] {
+            let folder = home.appendingPathComponent(rel)
+            try fm.createDirectory(at: folder, withIntermediateDirectories: true)
+            XCTAssertNil(actions.plannedTargets(items, in: results, folder: folder), rel)
+        }
+        let ok = home.appendingPathComponent("Stuff/Archive")
+        try fm.createDirectory(at: ok, withIntermediateDirectories: true)
+        XCTAssertNotNil(actions.plannedTargets(items, in: results, folder: ok))
+    }
 }

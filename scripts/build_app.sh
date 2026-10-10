@@ -36,6 +36,8 @@ mkdir -p "$APP/Contents/MacOS" "$APP/Contents/Resources"
 cp "$BIN/Hoardless" "$APP/Contents/MacOS/Hoardless"
 cp -R rules/apps "$APP/Contents/Resources/rules"
 cp -R Sources/Hoardless/Resources/Art "$APP/Contents/Resources/Art"
+# Empty language folders: they tell macOS the app speaks both, so its own menu items (About, Hide, Quit…) follow.
+mkdir -p "$APP/Contents/Resources/en.lproj" "$APP/Contents/Resources/zh-Hans.lproj"
 
 # App icon. With Xcode 26 or later, actool compiles the layered Liquid Glass icon (icon/AppIcon.icon) into
 # Assets.car plus a small AppIcon.icns; older Macs use the flattened images it also writes. Without it, fall back to
@@ -75,6 +77,8 @@ cat > "$APP/Contents/Info.plist" <<'PLIST'
     <key>CFBundlePackageType</key><string>APPL</string>
     <key>CFBundleShortVersionString</key><string>0.1.0</string>
     <key>CFBundleVersion</key><string>1</string>
+    <key>CFBundleDevelopmentRegion</key><string>en</string>
+    <key>CFBundleLocalizations</key><array><string>en</string><string>zh-Hans</string></array>
     <key>LSMinimumSystemVersion</key><string>14.0</string>
     <key>NSHighResolutionCapable</key><true/>
 </dict>

@@ -89,11 +89,15 @@ final class DuplicateModel: ObservableObject {
         guard canStart else { return }
         problem = nil
         self.chinese = chinese
-        let rules = RuleLoader.bundledRulesDirectory().flatMap { try? RuleLoader.load(from: $0) } ?? []
-        let environment = ProcessInfo.processInfo.environment
-        let locations = rules.flatMap { policy.locations(for: $0, environment: environment).accepted }
+        // Without the rules, apps' folders would not be protected: refuse rather than search unprotected.
+        guard let rules = RuleLoader.bundledRulesDirectory().flatMap({ try? RuleLoader.load(from: $0) }), !rules.isEmpty else {
+            problem = Strings(chinese: chinese).dupRulesMissing
+            return
+        }
         let search = DuplicateSearch(roots: folders.filter(\.on).map(\.url), minimumSize: minimumSize,
-                                     appFolders: DuplicateSearch.appFolders(for: locations, policy: policy), policy: policy)
+                                     appFolders: DuplicateSearch.appFolders(for: rules, policy: policy,
+                                                                            environment: ProcessInfo.processInfo.environment),
+                                     ruleIDs: Set(rules.map(\.id)), policy: policy)
         self.search = search
         if !search.refused.isEmpty {
             let t = Strings(chinese: chinese)

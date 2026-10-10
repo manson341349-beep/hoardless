@@ -13,9 +13,14 @@ if CommandLine.arguments.count > 2, CommandLine.arguments[1] == "duplicates" {
             FileHandle.standardError.write("refused \(f.path): \(why)\n".data(using: .utf8)!)
         }
     }
-    let rules = RuleLoader.bundledRulesDirectory().flatMap { try? RuleLoader.load(from: $0) } ?? []
-    let locations = rules.flatMap { policy.locations(for: $0, environment: ProcessInfo.processInfo.environment).accepted }
-    let search = DuplicateSearch(roots: folders, appFolders: DuplicateSearch.appFolders(for: locations, policy: policy), policy: policy)
+    // Without the rules, apps' folders would not be protected: refuse rather than search unprotected.
+    guard let rules = RuleLoader.bundledRulesDirectory().flatMap({ try? RuleLoader.load(from: $0) }), !rules.isEmpty else {
+        FileHandle.standardError.write("rules could not be loaded; not searching\n".data(using: .utf8)!)
+        exit(2)
+    }
+    let search = DuplicateSearch(roots: folders, appFolders: DuplicateSearch.appFolders(for: rules, policy: policy,
+                                                                                         environment: ProcessInfo.processInfo.environment),
+                                 ruleIDs: Set(rules.map(\.id)), policy: policy)
     guard let (groups, skipped) = DuplicateFinder.find(search) else { exit(1) }
     let out: [String: Any] = [
         "roots": search.roots.map(\.path),

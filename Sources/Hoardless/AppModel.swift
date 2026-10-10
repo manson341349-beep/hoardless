@@ -48,7 +48,15 @@ final class AppModel: ObservableObject {
 
     /// The user's pick in the window's language switch, remembered between launches.
     @Published var language: Language = Language(rawValue: UserDefaults.standard.string(forKey: "language") ?? "") ?? .system {
-        didSet { UserDefaults.standard.set(language.rawValue, forKey: "language") }
+        didSet {
+            UserDefaults.standard.set(language.rawValue, forKey: "language")
+            // The menu bar's own items (About, Hide, Quit…) come from macOS and follow this from the next launch.
+            switch language {
+            case .system: UserDefaults.standard.removeObject(forKey: "AppleLanguages")
+            case .chinese: UserDefaults.standard.set(["zh-Hans"], forKey: "AppleLanguages")
+            case .english: UserDefaults.standard.set(["en"], forKey: "AppleLanguages")
+            }
+        }
     }
 
     var chinese: Bool {
@@ -190,13 +198,13 @@ final class AppModel: ObservableObject {
 
     /// The locations of a rule that may be trashed or moved right now.
     func actionable(_ result: RuleResult) -> [Location] {
-        busy ? [] : actions.actionable(result)
+        busy ? [] : actions.actionable(result, among: results)
     }
 
     /// Whether the rule has locations that could be acted on once no scan or action is running (for showing a
     /// disabled tick box instead of a lock while busy).
     func couldAct(_ result: RuleResult) -> Bool {
-        result.locations.contains { actions.canAct($0, in: result) }
+        !actions.actionable(result, among: results).isEmpty
     }
 
     var busy: Bool { working || phase == .scanning }
@@ -240,14 +248,17 @@ final class AppModel: ObservableObject {
         panel.message = Strings(chinese: chinese).chooseFolderMessage
         panel.directoryURL = startFolderForMove()
         let batch = items.map(\.batchItem), current = results, actions = self.actions
-        let refusal = Strings(chinese: chinese).actionFailed(ActionError.badDestination(.notAllowedPlace))
+        let t = Strings(chinese: chinese)
+        let refusal = { (folder: URL) -> String in
+            t.actionFailed(ActionError.badDestination(actions.isInsideAppData(folder, among: current) ? .insideAppData : .notAllowedPlace))
+        }
         // Checked when "Move here" is clicked, so a folder that can't be used keeps the panel open with the reason.
-        let validator = MoveFolderValidator { actions.plannedTargets(batch, in: current, folder: $0) == nil ? refusal : nil }
+        let validator = MoveFolderValidator { actions.plannedTargets(batch, in: current, folder: $0) == nil ? refusal($0) : nil }
         panel.delegate = validator
         let answer = withExtendedLifetime(validator) { panel.runModal() }
         guard answer == .OK, let folder = panel.url else { return }
         guard actions.plannedTargets(batch, in: current, folder: folder) != nil else {
-            actionError = refusal
+            actionError = refusal(folder)
             return
         }
         UserDefaults.standard.set(folder.path, forKey: "lastMoveFolder")
@@ -321,6 +332,11 @@ final class AppModel: ObservableObject {
     /// The exact folder a move would land in for one item, for the confirmation sheet.
     func plannedTarget(_ item: Item, in folder: URL) -> URL? {
         actions.plannedTarget(for: item.location, of: item.result, in: folder)
+    }
+
+    /// The folder is in iCloud Drive (for example a synced Desktop or Documents), so whatever goes in is uploaded.
+    func isInICloud(_ folder: URL) -> Bool {
+        (try? folder.resourceValues(forKeys: [.isUbiquitousItemKey]))?.isUbiquitousItem == true
     }
 
     func reveal(_ location: Location) {

@@ -31,19 +31,38 @@ public struct UndoOutcome: Sendable {
 /// Ticking several rules, acting on them in one go, and undoing that. Every single item still goes through
 /// `trash`, `move` and `undo`, which re-check it on disk right before changing anything.
 extension FileActions {
-    /// The locations of a rule that may be trashed or moved.
-    public func actionable(_ result: RuleResult) -> [Location] {
-        result.locations.filter { canAct($0, in: result) }
+    /// The locations of a rule that may be trashed or moved. With `results`, a location that holds another one
+    /// (of another rule, a setting or a variable) is left out: acting on it would take that one along unnamed.
+    public func actionable(_ result: RuleResult, among results: [RuleResult] = []) -> [Location] {
+        result.locations.filter { canAct($0, in: result) && nestedLocation(in: $0, among: results) == nil }
     }
 
     /// The ticked location ids that may be acted on in these results. Anything else ticked is dropped.
     public func items(for selection: Set<String>, in results: [RuleResult]) -> [BatchItem] {
-        results.flatMap { r in actionable(r).filter { selection.contains($0.id) }.map { BatchItem(ruleID: r.id, location: $0) } }
+        results.flatMap { r in actionable(r, among: results).filter { selection.contains($0.id) }.map { BatchItem(ruleID: r.id, location: $0) } }
+    }
+
+    /// Another location that sits inside `location`, if any.
+    public func nestedLocation(in location: Location, among results: [RuleResult]) -> Location? {
+        let outer = PathPolicy.fold(location.url.path)
+        return results.lazy.flatMap(\.locations).first { other in
+            let inner = PathPolicy.fold(other.url.path)
+            return inner.count > outer.count && Array(inner.prefix(outer.count)) == outer
+        }
+    }
+
+    /// Whether `folder` is inside a location of the results or an app's folder around one: a move must not put data
+    /// where trashing that location, or the app itself, would later take it along.
+    public func isInsideAppData(_ folder: URL, among results: [RuleResult]) -> Bool {
+        let real = folder.standardizedFileURL.resolvingSymlinksInPath()
+        let zones = DuplicateSearch.appFolders(for: results.flatMap(\.locations), policy: policy)
+        return zones.contains { DuplicateSearch.isInside(real, $0) }
     }
 
     /// Where each item would land in `folder`, by location id; nil if any of them can't go there, so the move is
     /// refused before the user is asked to confirm it.
     public func plannedTargets(_ items: [BatchItem], in results: [RuleResult], folder: URL) -> [String: URL]? {
+        guard !isInsideAppData(folder, among: results) else { return nil }
         var targets: [String: URL] = [:]
         for item in items {
             guard let result = results.first(where: { $0.id == item.ruleID }),
@@ -60,6 +79,12 @@ extension FileActions {
         for item in items {
             guard let result = results.first(where: { $0.id == item.ruleID }) else {
                 outcome.failures.append((item.location, .changedSinceScan)); continue
+            }
+            if let other = nestedLocation(in: item.location, among: results) {
+                outcome.failures.append((item.location, .holdsOtherLocation(other.display))); continue
+            }
+            if case .move(let folder) = kind, isInsideAppData(folder, among: results) {
+                outcome.failures.append((item.location, .badDestination(.insideAppData))); continue
             }
             do {
                 switch kind {

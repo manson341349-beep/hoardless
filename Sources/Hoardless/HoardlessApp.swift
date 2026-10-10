@@ -20,6 +20,8 @@ struct HoardlessApp: App {
                 .frame(minWidth: 1040, minHeight: 700)
                 .onAppear {
                     NSApplication.shared.activate()
+                    AppDelegate.isBusy = { [weak model, weak duplicates] in model?.working == true || duplicates?.working == true }
+                    AppDelegate.chinese = { [weak model] in model?.chinese ?? false }
                     model.appeared()
                 }
                 .modifier(RememberOpenWindow())
@@ -43,6 +45,23 @@ final class AppDelegate: NSObject, NSApplicationDelegate {
     static let mainWindowID = "main"
     /// SwiftUI's own "open window" action, taken from the window when it first appears.
     @MainActor static var openWindow: OpenWindowAction?
+
+    /// Whether files are being moved or put back right now, and the app's language; set by the window.
+    @MainActor static var isBusy: () -> Bool = { false }
+    @MainActor static var chinese: () -> Bool = { false }
+
+    /// Quitting, logging out or restarting in the middle of a move can leave a half-made copy, so ask first.
+    @MainActor
+    func applicationShouldTerminate(_ sender: NSApplication) -> NSApplication.TerminateReply {
+        guard Self.isBusy() else { return .terminateNow }
+        let t = Strings(chinese: Self.chinese())
+        let alert = NSAlert()
+        alert.messageText = t.quitWhileWorkingTitle
+        alert.informativeText = t.quitWhileWorkingBody
+        alert.addButton(withTitle: t.keepWorking)
+        alert.addButton(withTitle: t.quitAnyway)
+        return alert.runModal() == .alertSecondButtonReturn ? .terminateNow : .terminateCancel
+    }
 
     @MainActor
     func applicationShouldHandleReopen(_ sender: NSApplication, hasVisibleWindows flag: Bool) -> Bool {

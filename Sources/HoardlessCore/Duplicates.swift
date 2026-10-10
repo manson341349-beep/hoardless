@@ -43,7 +43,9 @@ public struct DuplicateFile: Sendable, Hashable, Identifiable {
 
     /// The same copy as it is on disk now (after Undo put it back), or nil if it is no longer the same file.
     public func refreshed() -> DuplicateFile? {
-        guard let now = FileStamp(url.path), now.isRegular, now.identity == identity, now.size == size else { return nil }
+        // A move to the Trash and back keeps the modification time; an edit meanwhile changes it.
+        guard let now = FileStamp(url.path), now.isRegular, now.identity == identity, now.size == size,
+              now.modified == modified else { return nil }
         return DuplicateFile(url: url, size: size, identity: identity, modified: now.modified, changed: now.changed,
                              freeable: freeable, viewOnly: viewOnly, inICloud: inICloud)
     }
@@ -127,6 +129,8 @@ public struct DuplicateSearch: Sendable {
     public let minimumSize: Int64
     /// Apps' own folders (see `appFolders(for:)`); copies inside them are view-only.
     public let appFolders: [URL]
+    /// Rule ids: "<folder>/Hoardless/<rule id>" is where the main screen's Move puts an app's data.
+    public let ruleIDs: Set<String>
     public let policy: PathPolicy
     /// Folders the user asked for that failed `checkRoot`, with the reason.
     public let refused: [(url: URL, problem: RootProblem)]
@@ -134,8 +138,10 @@ public struct DuplicateSearch: Sendable {
     /// Media libraries that macOS apps manage outside a package (TV and Music copy imported files here).
     static let builtInAppFolders = ["Movies/TV", "Music/Music", "Music/iTunes"]
 
-    public init(roots: [URL], minimumSize: Int64 = 1_000_000, appFolders: [URL] = [], policy: PathPolicy = PathPolicy()) {
+    public init(roots: [URL], minimumSize: Int64 = 1_000_000, appFolders: [URL] = [], ruleIDs: Set<String> = [],
+                policy: PathPolicy = PathPolicy()) {
         self.policy = policy
+        self.ruleIDs = ruleIDs
         self.minimumSize = minimumSize
         self.appFolders = (appFolders + Self.builtInAppFolders.map { policy.home.appendingPathComponent($0) })
             .map { $0.standardizedFileURL.resolvingSymlinksInPath() }
@@ -188,6 +194,28 @@ public struct DuplicateSearch: Sendable {
     /// The whole folder each app keeps its data in, from the rules' locations: a rule path like
     /// ~/Movies/CapCut/User Data/Cache/effect protects all of ~/Movies/CapCut, and ~/.cache/huggingface/hub all of
     /// ~/.cache. Folders read from settings or environment variables are the user's own choice, so only they count.
+    public static func appFolders(for rules: [Rule], policy: PathPolicy, environment: [String: String]) -> [URL] {
+        var locations: [Location] = [], named: [URL] = []
+        for rule in rules {
+            let found = policy.locations(for: rule, environment: environment)
+            locations += found.accepted
+            // A location the scanner refused (a whole standard folder such as ~/Movies, the home folder) is still
+            // where the app keeps its data; so is the folder a variable or a settings entry names before any subpath
+            // (ComfyUI's base folder, not only its models folder).
+            named += found.rejected.filter { $0.path.hasPrefix("/") }.map { URL(fileURLWithPath: $0.path) }
+            if let override = rule.envOverrides?.first(where: { !(environment[$0.var] ?? "").isEmpty }),
+               let value = environment[override.var] {
+                named.append(URL(fileURLWithPath: (value as NSString).expandingTildeInPath))
+            }
+            for setting in rule.appSettings ?? [] { named += AppSettings.paths(for: setting, policy: policy, withSubpath: false) }
+        }
+        var out = appFolders(for: locations, policy: policy)
+        for url in named.map({ $0.standardizedFileURL.resolvingSymlinksInPath() }) where policy.relativeComponents(url) != nil {
+            if !out.contains(url) { out.append(url) }
+        }
+        return out
+    }
+
     public static func appFolders(for locations: [Location], policy: PathPolicy) -> [URL] {
         let standard: Set<String> = ["desktop", "documents", "downloads", "movies", "music", "pictures"]
         var out: [URL] = []
@@ -217,6 +245,8 @@ public struct DuplicateSearch: Sendable {
             let name = dir.lastPathComponent
             let folded = PathPolicy.fold(name).first ?? ""
             if folded.hasPrefix(".") || Self.appDataNames.contains(folded) || Self.isPackage(dir) { return .appFolder(policy.tilde(dir)) }
+            // An app's data moved out by the main screen is still that app's data.
+            if ruleIDs.contains(name), dir.deletingLastPathComponent().lastPathComponent == "Hoardless" { return .appFolder(policy.tilde(dir)) }
             if DuplicateFinder.skippedFolderNames.contains(name) || DuplicateFinder.isEnvironment(dir) { return .toolFolder }
             if Self.repositoryMarkers.contains(where: { fm.fileExists(atPath: dir.appendingPathComponent($0).path) }) { return .codeRepository }
             dir.deleteLastPathComponent()

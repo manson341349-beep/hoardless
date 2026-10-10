@@ -25,10 +25,13 @@ private struct GeneralPane: View {
     var body: some View {
         Form {
             Section {
-                Picker(t.language, selection: $model.language) {
+                Picker(selection: $model.language) {
                     Text(t.languageAuto).tag(AppModel.Language.system)
                     Text("中文").tag(AppModel.Language.chinese)
                     Text("English").tag(AppModel.Language.english)
+                } label: {
+                    Text(t.language)
+                    Text(t.languageNote)
                 }
                 .pickerStyle(.segmented)
                 Toggle(isOn: $model.autoScan) {

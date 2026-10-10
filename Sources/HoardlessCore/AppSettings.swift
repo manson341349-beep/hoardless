@@ -8,7 +8,7 @@ public enum AppSettings {
     static let maxTextSize = 1_000_000
 
     /// Every path the settings entry names, with `subpath` added. Empty if the file is missing or unreadable.
-    public static func paths(for setting: Rule.AppSetting, policy: PathPolicy) -> [URL] {
+    public static func paths(for setting: Rule.AppSetting, policy: PathPolicy, withSubpath: Bool = true) -> [URL] {
         guard let file = policy.expand(setting.file),
               let attrs = try? FileManager.default.attributesOfItem(atPath: file.path),
               attrs[.type] as? FileAttributeType == .typeRegular else { return [] }
@@ -23,7 +23,7 @@ public enum AppSettings {
             let expanded = (value as NSString).expandingTildeInPath
             guard expanded.hasPrefix("/") else { return nil }
             var url = URL(fileURLWithPath: expanded)
-            if let sub = setting.subpath { url.appendPathComponent(sub) }
+            if withSubpath, let sub = setting.subpath { url.appendPathComponent(sub) }
             return url
         }
     }

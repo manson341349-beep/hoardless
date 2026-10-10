@@ -9,7 +9,7 @@ struct ContentView: View {
     var body: some View {
         NavigationSplitView {
             Sidebar(t: t)
-                .navigationSplitViewColumnWidth(min: 210, ideal: 236, max: 280)
+                .navigationSplitViewColumnWidth(min: 264, ideal: 276, max: 320)
         } detail: {
             ZStack {
                 PageBackground(screen: model.screen)
@@ -391,7 +391,7 @@ private struct PermissionRow: View {
     var body: some View {
         HStack(spacing: 14) {
             Image(systemName: "lock").foregroundStyle(Theme.dim).frame(width: 16)
-            Text("\(results.map { $0.rule.title.text(chinese: t.chinese) }.joined(separator: " · "))：\(t.permissionRow)")
+            Text(results.map { $0.rule.title.text(chinese: t.chinese) }.joined(separator: " · ") + t.colon + t.permissionRow)
                 .font(.callout).foregroundStyle(Theme.paper.opacity(0.75)).lineLimit(3)
             Spacer()
             Button(t.allowAndCheck) {
@@ -497,7 +497,7 @@ private struct ConfirmSheet: View {
             ScrollView {
                 VStack(alignment: .leading, spacing: 6) {
                     ForEach(rules) { r in
-                        Text("\(r.rule.title.text(chinese: t.chinese))：\(r.rule.explain.text(chinese: t.chinese))")
+                        Text(r.rule.title.text(chinese: t.chinese) + t.colon + r.rule.explain.text(chinese: t.chinese))
                             .font(.callout).foregroundStyle(.secondary).fixedSize(horizontal: false, vertical: true)
                     }
                 }
@@ -505,7 +505,11 @@ private struct ConfirmSheet: View {
             .frame(maxHeight: 140)
             switch action {
             case .trash: Text(t.batchTrashNote).font(.callout).fixedSize(horizontal: false, vertical: true)
-            case .move: Text(t.batchMoveNote).font(.callout).fixedSize(horizontal: false, vertical: true)
+            case .move(_, let folder):
+                Text(t.batchMoveNote).font(.callout).fixedSize(horizontal: false, vertical: true)
+                if model.isInICloud(folder) {
+                    Text(t.moveToICloudWarning(size)).font(.callout).foregroundStyle(Theme.warn).fixedSize(horizontal: false, vertical: true)
+                }
             }
             HStack {
                 Spacer()

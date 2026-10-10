@@ -382,4 +382,71 @@ final class DuplicatesTests: XCTestCase {
         XCTAssertEqual(out.failures.map { $0.error }, [.changedSinceScan])
         XCTAssertEqual(try Data(contentsOf: a), content(27), "the item that was moved by mistake is back where it was")
     }
+    // MARK: app folders from the rules (audit 2026-10-10)
+
+    private func rule(_ id: String, _ extra: [String: Any]) throws -> Rule {
+        var json: [String: Any] = ["id": id, "app": "T", "category": "ai-models", "title": ["en": id, "zh": id],
+                                   "explain": ["en": "e", "zh": "e"], "safety": "protected", "status": "verified"]
+        json.merge(extra) { $1 }
+        return try JSONDecoder().decode(Rule.self, from: JSONSerialization.data(withJSONObject: json))
+    }
+
+    func testFolderASettingNamesIsProtectedNotOnlyItsSubpath() throws {
+        // ComfyUI-style: settings name the base folder, the rule adds "models"; the input folder is app data too.
+        try write(".foo/base.txt", Data(home.appendingPathComponent("Studio/ComfyUI").path.utf8))
+        let r = try rule("comfy", ["paths": ["~/.foo/default/models"],
+                                   "app_settings": [["file": "~/.foo/base.txt", "format": "pointer", "subpath": "models"]]])
+        let zones = DuplicateSearch.appFolders(for: [r], policy: policy, environment: [:])
+        XCTAssertTrue(zones.contains(home.appendingPathComponent("Studio/ComfyUI")))
+        let data = content(21)
+        try write("Downloads/portrait.png", data)
+        try write("Studio/ComfyUI/input/portrait.png", data)
+        let found = try groups(search(["Downloads", "Studio"], appFolders: zones))
+        let input = try XCTUnwrap(found.first?.files.first { $0.url.path.contains("ComfyUI/input") })
+        XCTAssertEqual(input.viewOnly, .appFolder("~/Studio/ComfyUI"))
+    }
+
+    func testAFolderTheScannerRefusesIsStillProtected() throws {
+        // Drafts set to the whole Movies folder: the scanner refuses it, the duplicate finder must still protect it.
+        let r = try rule("drafts", ["paths": ["~/.foo/drafts"], "env_overrides": [["var": "FOO_DRAFTS"]]])
+        let zones = DuplicateSearch.appFolders(for: [r], policy: policy, environment: ["FOO_DRAFTS": home.appendingPathComponent("Movies").path])
+        XCTAssertTrue(zones.contains(home.appendingPathComponent("Movies")))
+        let data = content(22)
+        try write("Downloads/clip.mov", data)
+        try write("Movies/My Draft/clip.mov", data)
+        let found = try groups(search(["Downloads", "Movies"], appFolders: zones))
+        let draft = try XCTUnwrap(found.first?.files.first { $0.url.path.contains("My Draft") })
+        XCTAssertFalse(draft.canStay)
+        XCTAssertNotNil(draft.viewOnly)
+    }
+
+    func testDataMovedOutByTheMainScreenIsStillAppData() throws {
+        let data = content(23)
+        try write("Downloads/large-v3.pt", data)
+        try write("Downloads/Hoardless/whisper-models/whisper/large-v3.pt", data)
+        let s = DuplicateSearch(roots: [home.appendingPathComponent("Downloads")], minimumSize: 1000,
+                                ruleIDs: ["whisper-models"], policy: policy)
+        let found = try groups(s)
+        let moved = try XCTUnwrap(found.first?.files.first { $0.url.path.contains("/Hoardless/") })
+        XCTAssertEqual(moved.viewOnly, .appFolder("~/Downloads/Hoardless/whisper-models"))
+        XCTAssertFalse(moved.canStay, "a moved cache never counts as the copy that stays")
+        let mine = try XCTUnwrap(found.first?.files.first { !$0.url.path.contains("/Hoardless/") })
+        let out = actions.trashDuplicates([mine.url.path], in: found, search: s)
+        XCTAssertEqual(out.failures.map(\.error), [.noCopyLeft], "the user's own copy is the last one that stays")
+    }
+
+    func testCopyEditedWhileInTheTrashIsNotTakenBackAsIdentical() throws {
+        let a = try write("Downloads/a.bin", content(24))
+        try write("Downloads/b.bin", content(24))
+        let s = search(["Downloads"])
+        let found = try groups(s)
+        let out = actions.trashDuplicates([a.path], in: found, search: s)
+        let record = try XCTUnwrap(out.records.first)
+        var edited = content(24)
+        edited[0] ^= 0xFF  // same size, different bytes
+        try edited.write(to: record.now)
+        try actions.undo(record)
+        let old = try XCTUnwrap(found.first?.files.first { $0.url == a })
+        XCTAssertNil(old.refreshed(), "an edit while in the Trash means it is no longer the same copy")
+    }
 }

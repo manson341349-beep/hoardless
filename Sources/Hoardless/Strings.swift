@@ -5,6 +5,8 @@ struct Strings {
     let chinese: Bool
 
     private func s(_ zh: String, _ en: String) -> String { chinese ? zh : en }
+    /// "1 item", "2 items": English needs the singular for one.
+    private func n(_ count: Int, _ one: String, _ many: String) -> String { "\(count) \(count == 1 ? one : many)" }
 
     var scanning: String { s("正在扫描…", "Scanning…") }
     var heroIdle: String { s("看看你的 Mac\n囤了什么", "See what your Mac is hoarding") }
@@ -46,23 +48,41 @@ struct Strings {
     func actionFailed(_ error: Error) -> String {
         switch error as? ActionError {
         case .notAllowed?: return s("这一项不允许移动或删除。", "This item can't be moved or trashed.")
+        case .holdsOtherLocation(let inner)?:
+            return s("没有动它：它里面还有另一个位置（\(inner)），那是别的应用或设置在用的。", "Left alone: another location (\(inner)) sits inside it and belongs to another app or setting.")
         case .changedSinceScan?: return s("这个文件夹在扫描后变了，没有动它。请重新扫描后再试。", "This folder changed since the scan, so it was left alone. Rescan and try again.")
         case .badDestination(.notAFolder)?: return s("不能挪到那里：这不是一个已有的文件夹。", "Can't move it there: not an existing folder.")
-        case .badDestination(.notAllowedPlace)?: return s("不能挪到那里：只能挪到外置硬盘，或你个人文件夹里的普通文件夹（不能是个人文件夹本身、废纸篓、资源库或缓存文件夹）。", "Can't move it there: pick an external drive or an ordinary folder in your home folder (not the home folder itself, the Trash, Library or a cache folder).")
+        case .badDestination(.notAllowedPlace)?: return s("不能挪到那里：只能挪到外置硬盘，或你个人文件夹里的普通文件夹（不能是个人文件夹本身、资源库、废纸篓、隐藏文件夹或缓存文件夹）。", "Can't move it there: pick an external drive or an ordinary folder in your home folder (not the home folder itself, Library, the Trash, a hidden folder or a cache folder).")
         case .badDestination(.insideSource)?: return s("不能挪到那里：目标在要挪走的文件夹里面。", "Can't move it there: it is inside the folder being moved.")
+        case .badDestination(.insideAppData)?: return s("不能挪到那里：那是某个应用的数据文件夹，之后清理它时会把挪进去的东西一起带走。", "Can't move it there: it is an app's data folder, and cleaning that later would take what you moved along.")
         case .badDestination(.linkInside)?: return s("不能挪到那里：目标里的 Hoardless 文件夹是一个链接，指向别处。", "Can't move it there: the Hoardless folder there is a link to somewhere else.")
         case .undoBlocked(.gone(let path))?: return s("没法撤销：它已经不在 \(path) 了。", "Couldn't undo: it is no longer at \(path).")
         case .undoBlocked(.occupied(let path))?: return s("没法撤销：\(path) 已经有新的东西，没有覆盖它。", "Couldn't undo: something new is at \(path), so nothing was overwritten.")
         case .undoBlocked(.unsafeOriginal)?: return s("没法撤销：原来的位置已经不安全了。", "Couldn't undo: the original place is not safe any more.")
         case .undoBlocked(.notSameItem)?: return s("没法撤销：那里的东西已经不是当初挪走的那一个。", "Couldn't undo: the item there is not the one that was moved.")
         case .trashNoLocation?: return s("没有完成：废纸篓没有告诉我们它放到了哪里。", "Didn't finish: the Trash did not report where the item went.")
-        case .partialMove(let leftover, let message)?:
-            return s("没有挪完（\(message)）。原来的文件夹还在原处；目标位置留下了一份不完整的拷贝：\(leftover)，确认没用后可以自己删掉。",
-                     "The move didn't finish (\(message)). The original folder is still in place; an incomplete copy was left at \(leftover). Delete it yourself once you've checked it.")
+        case .copyIncomplete(let leftover, let message)?:
+            return s("没有挪成：复制到那个位置时没有完成\(why(message))。原来的文件夹没有动过。", "Not moved: copying there did not finish\(why(message)). The original folder was not touched.")
+                + leftoverNote(leftover)
+        case .changedWhileCopying(let leftover)?:
+            return s("没有挪成：复制的过程中，这个文件夹里有东西在变（相关软件可能还开着）。原来的文件夹没有动过；先退出那个软件再试。",
+                     "Not moved: something in this folder changed while it was being copied (the app may still be running). The original folder was not touched; quit that app and try again.")
+                + leftoverNote(leftover)
+        case .originalChanged(let copy)?:
+            return s("没有挪成：复制好之后，原来的文件夹被换掉或不见了，所以没有把它移到废纸篓。复制好的完整一份留在：\(copy)",
+                     "Not moved: after the copy was made, the original folder was replaced or disappeared, so it was not sent to the Trash. The complete copy was kept at \(copy)")
+        case .originalKept(let copy, let message)?:
+            return s("没有挪成：已经复制好了，但原来的文件夹没能移到废纸篓\(why(message))，所以这次挪动撤回了，原文件夹原样留着。",
+                     "Not moved: the copy was made, but the original folder could not go to the Trash\(why(message)), so the move was undone and the original is unchanged.")
+                + (copy.map { s("复制好的那份没能移到废纸篓，现在两边各有一份完整的；另一份在：\($0)", " The copy could not go to the Trash either, so there are now two full copies; the other one is at \($0)") } ?? "")
         case .noCopyLeft?: return s("没有动它：这一组里没有别的副本还原样留着，删了就一份都不剩。", "Left alone: no other copy in this group is still unchanged, so this would be the last one.")
         case .failed(let why)?: return s("没有完成：\(why)", "Didn't finish: \(why)")
         case nil: return error.localizedDescription
         }
+    }
+    private func why(_ message: String) -> String { message.isEmpty ? "" : s("（\(message)）", " (\(message))") }
+    private func leftoverNote(_ leftover: String?) -> String {
+        leftover.map { s("那份没复制完的拷贝没能移到废纸篓，还留在：\($0)，可以放心删掉。", " The unfinished copy could not go to the Trash and is still at \($0); it is safe to delete.") } ?? ""
     }
     var fromAppSetting: String { s("应用设置里的位置 · 只显示", "From the app's settings · view only") }
     var fromEnvironment: String { s("环境变量指定的位置 · 只显示", "From an environment variable · view only") }
@@ -75,6 +95,7 @@ struct Strings {
         }
     }
     var language: String { s("界面语言", "Language") }
+    var languageNote: String { s("菜单栏会在下次打开 App 时跟着变", "The menu bar follows from the next launch") }
     var languageAuto: String { s("跟随系统", "Auto") }
     var scanFirst: String { s("先回到总览点\u{201C}扫描\u{201D}。", "Go back and press Scan first.") }
     var readOnlyNotice: String { s("扫描只读。移走的东西只进废纸篓或你选的文件夹，不会永久删除。", "Scanning only reads. Anything you remove goes to the Trash or a folder you pick; nothing is deleted permanently.") }
@@ -126,13 +147,13 @@ struct Strings {
                                      "Video editors' caches, downloaded material and drafts. Caches they rebuild can go; drafts and downloaded material are view only.")
         case .aiModels: return s("Hugging Face、PyTorch、Ollama 等下载的模型和缓存。需要时会重新下载；你自己训练或改过的模型只显示大小。",
                                  "Models and caches downloaded by Hugging Face, PyTorch, Ollama and others. They download again when needed; models you made are view only.")
-        case .packageCache: return s("pip、uv、conda 等下载过的安装包。删掉后，下次安装时会重新下载。",
-                                     "Packages downloaded by pip, uv, conda and others. They download again the next time you install.")
-        case .devTools: return s("Docker 等开发工具的数据。里面可能有你的项目数据，只显示大小。",
-                                 "Data of developer tools such as Docker. It may hold project data, so it is view only.")
+        case .packageCache: return s("pip、uv、npm、pnpm、Homebrew 等下载过的安装包。删掉后，下次安装时会重新下载。",
+                                     "Packages downloaded by pip, uv, npm, pnpm, Homebrew and others. They download again the next time you install.")
+        case .devTools: return s("Docker、Playwright 等开发工具的数据。可能有你的项目数据或登录记录的，只显示大小。",
+                                 "Data of developer tools such as Docker and Playwright. Anything that may hold project data or logins is view only.")
         }
     }
-    func locationsCount(_ n: Int) -> String { s("\(n) 个位置", "\(n) locations") }
+    func locationsCount(_ n: Int) -> String { s("\(n) 个位置", self.n(n, "location", "locations")) }
     var permissionRow: String { s("在受保护的文件夹里，macOS 会先问你", "In a protected folder; macOS asks you first") }
     var allowAndCheck: String { s("允许并检查", "Allow and check") }
     func selectedSummary(_ n: Int, _ size: String) -> String { s("已选 \(n) 项 · \(size)", "\(n) selected · \(size)") }
@@ -142,22 +163,34 @@ struct Strings {
         s("\(original) 没能放回（\(why)）。它现在在：\(now)", "\(original) was not put back (\(why)). It is now at: \(now)")
     }
     func batchTrashTitle(_ n: Int, _ places: Int, _ size: String) -> String {
-        s("把 \(n) 项（\(places) 个位置，\(size)）移到废纸篓？", "Move \(n) items (\(places) places, \(size)) to the Trash?")
+        s("把 \(n) 项（\(places) 个位置，\(size)）移到废纸篓？", "Move \(self.n(n, "item", "items")) (\(self.n(places, "place", "places")), \(size)) to the Trash?")
     }
     func batchMoveTitle(_ n: Int, _ places: Int, _ size: String) -> String {
-        s("把 \(n) 项（\(places) 个位置，\(size)）挪走？", "Move \(n) items (\(places) places, \(size))?")
+        s("把 \(n) 项（\(places) 个位置，\(size)）挪走？", "Move \(self.n(n, "item", "items")) (\(self.n(places, "place", "places")), \(size))?")
     }
     var batchTrashNote: String {
         s("不会永久删除：它们会进废纸篓，清空废纸篓之前都能放回。完成后这里会出现\u{201C}撤销\u{201D}，在你点\u{201C}知道了\u{201D}、做下一个操作或退出 App 之前有效。",
           "Nothing is deleted permanently: they go to the Trash and can be put back until it is emptied. An Undo button appears here until you dismiss it, act again or quit.")
     }
     var batchMoveNote: String {
-        s("挪走后，应用会当它们已被删除，需要时重新下载。完成后这里会出现\u{201C}撤销\u{201D}，在你点\u{201C}知道了\u{201D}、做下一个操作或退出 App 之前有效。",
-          "The apps will treat them as deleted and download again when needed. An Undo button appears here until you dismiss it, act again or quit.")
+        s("挪之前请先退出相关的软件。挪走后，应用会当它们已被删除，需要时重新下载。挪到另一个硬盘时，会先完整复制、核对一遍，再把原来的文件夹移到废纸篓（不会直接删除），清空废纸篓后才会腾出这台 Mac 的空间。完成后这里会出现\u{201C}撤销\u{201D}，在你点\u{201C}知道了\u{201D}、做下一个操作或退出 App 之前有效。",
+          "Quit the apps that use them first. The apps will treat them as deleted and download again when needed. On another drive, everything is copied and checked first, then the originals go to the Trash (never deleted); this Mac's space comes back once the Trash is emptied. An Undo button appears here until you dismiss it, act again or quit.")
     }
+    func moveToICloudWarning(_ size: String) -> String {
+        s("这个文件夹会同步到 iCloud：挪进去的 \(size) 会上传到 iCloud、占用 iCloud 空间，也会出现在你的其他设备上。建议改挪到外置硬盘。",
+          "This folder syncs to iCloud: the \(size) moved here will upload to iCloud, use iCloud storage and appear on your other devices. An external drive is a better choice.")
+    }
+    var colon: String { s("：", ": ") }
+    var quitWhileWorkingTitle: String { s("Hoardless 还在挪动或放回文件", "Hoardless is still moving or putting back files") }
+    var quitWhileWorkingBody: String {
+        s("现在退出，可能会在目标位置留下一份没复制完的拷贝（原来的文件不会丢）。建议等它做完再退出。",
+          "Quitting now may leave an unfinished copy at the destination (the originals are not lost). It is better to wait until it finishes.")
+    }
+    var keepWorking: String { s("等它做完", "Wait") }
+    var quitAnyway: String { s("仍然退出", "Quit Anyway") }
     var whatTheyAre: String { s("它们是什么", "What they are") }
-    func batchTrashed(_ n: Int, _ size: String) -> String { s("已把 \(n) 项（\(size)）移到废纸篓。", "Moved \(n) items (\(size)) to the Trash.") }
-    func batchMoved(_ n: Int, _ size: String) -> String { s("已把 \(n) 项（\(size)）挪走。", "Moved \(n) items (\(size)).") }
+    func batchTrashed(_ n: Int, _ size: String) -> String { s("已把 \(n) 项（\(size)）移到废纸篓。", "Moved \(self.n(n, "item", "items")) (\(size)) to the Trash.") }
+    func batchMoved(_ n: Int, _ size: String) -> String { s("已把 \(n) 项（\(size)）挪走。", "Moved \(self.n(n, "item", "items")) (\(size)).") }
 
     // MARK: settings window
 
@@ -178,7 +211,7 @@ struct Strings {
 
     var dupTitle: String { s("重复文件", "Duplicates") }
     var dupTileHint: String { s("在你选的文件夹里找一模一样的文件", "Find identical files in folders you pick") }
-    func dupTileFound(_ groups: Int) -> String { s("\(groups) 组重复", "\(groups) duplicate sets") }
+    func dupTileFound(_ groups: Int) -> String { s("\(groups) 组重复", n(groups, "duplicate set", "duplicate sets")) }
     var dupSearchIn: String { s("在这些文件夹里找", "Look in these folders") }
     var dupAdd: String { s("添加文件夹…", "Add Folder…") }
     var dupAddPrompt: String { s("添加", "Add") }
@@ -199,19 +232,23 @@ struct Strings {
         s("只读查找：只比较文件内容，不改动任何东西。只找 \(minimum) 以上的文件（可在设置里改）；隐藏文件夹、应用包内部、Python 环境和 node_modules 不进去看。下载、桌面、文稿等文件夹第一次读取时，macOS 可能会弹窗询问。",
           "Read-only: it only compares file contents and changes nothing. Files under \(minimum) are ignored (change it in Settings); hidden folders, app packages, Python environments and node_modules are not looked inside. macOS may ask before Downloads, Desktop or Documents is read the first time.")
     }
+    var dupRulesMissing: String {
+        s("没有开始查找：规则文件没能读取，就认不出哪些文件夹是应用的数据。为了安全，这次不查找。请重新安装 Hoardless。",
+          "Not searching: the rule files could not be read, so apps' own folders can't be recognised. To be safe, nothing is searched. Please reinstall Hoardless.")
+    }
     var dupStart: String { s("开始查找", "Find Duplicates") }
     func dupListing(_ n: Int) -> String { s("正在查看文件… 已看 \(n) 个", "Looking through files… \(n) so far") }
     func dupComparing(_ done: Int64, _ total: Int64) -> String {
         s("正在比对内容 \(Bytes.text(done)) / \(Bytes.text(total))", "Comparing contents \(Bytes.text(done)) of \(Bytes.text(total))")
     }
     func dupSummary(_ groups: Int, _ bytes: Int64) -> String {
-        s("找到 \(groups) 组重复，最多可腾出 \(Bytes.text(bytes))", "\(groups) sets of duplicates, up to \(Bytes.text(bytes)) to free")
+        s("找到 \(groups) 组重复，最多可腾出 \(Bytes.text(bytes))", "\(n(groups, "set", "sets")) of duplicates, up to \(Bytes.text(bytes)) to free")
     }
     var dupNone: String { s("没有找到可以处理的重复文件。", "No duplicates you can act on.") }
     var dupNewSearch: String { s("重新查找", "New Search") }
     var dupKeepOneAll: String { s("每组只留一份", "Keep One of Each") }
     var dupClear: String { s("全部不选", "Select None") }
-    func dupShowViewOnly(_ n: Int) -> String { s("也显示只能查看的 \(n) 组（应用数据、代码仓库等）", "Also show \(n) view-only sets (app data, code repositories…)") }
+    func dupShowViewOnly(_ n: Int) -> String { s("也显示只能查看的 \(n) 组（应用数据、代码仓库等）", "Also show \(self.n(n, "view-only set", "view-only sets")) (app data, code repositories…)") }
     func dupCopies(_ size: Int64, _ count: Int) -> String { s("\(Bytes.text(size)) × \(count) 份", "\(Bytes.text(size)) × \(count)") }
     func dupGroupWasted(_ bytes: Int64) -> String { s("可腾出 \(Bytes.text(bytes))", "\(Bytes.text(bytes)) to free") }
     var dupKeepOne: String { s("只留一份", "Keep One") }
@@ -238,7 +275,7 @@ struct Strings {
     }
     func dupSelected(_ n: Int, _ bytes: Int64) -> String { s("已选 \(n) 个文件 · \(Bytes.text(bytes))", "\(n) selected · \(Bytes.text(bytes))") }
     var dupNoneSelected: String { s("勾选要移走的副本，每组至少留一份。", "Tick the copies to remove; one of each always stays.") }
-    func dupConfirmTitle(_ n: Int, _ bytes: Int64) -> String { s("把 \(n) 个文件（\(Bytes.text(bytes))）移到废纸篓？", "Move \(n) files (\(Bytes.text(bytes))) to the Trash?") }
+    func dupConfirmTitle(_ n: Int, _ bytes: Int64) -> String { s("把 \(n) 个文件（\(Bytes.text(bytes))）移到废纸篓？", "Move \(self.n(n, "file", "files")) (\(Bytes.text(bytes))) to the Trash?") }
     var dupConfirmKeep: String { s("每组都会至少留下一份原样的文件。要移到废纸篓的是：", "At least one unchanged copy of each file stays. These go to the Trash:") }
     var dupConfirmTrashNote: String {
         s("不会永久删除：它们会进废纸篓，清空废纸篓之前都能放回；空间要等清空废纸篓后才真正腾出来。完成后这里也会出现\u{201C}撤销\u{201D}，在你点\u{201C}知道了\u{201D}、再次移走或重新查找之前有效。",
@@ -246,13 +283,13 @@ struct Strings {
     }
     func dupICloudWarning(_ n: Int) -> String {
         s("其中 \(n) 个在 iCloud 云盘里（比如同步的桌面或文稿）：移到废纸篓后，你其他设备上的这份也会一起移走。",
-          "\(n) of them are in iCloud Drive (for example a synced Desktop or Documents): your other devices lose this copy too.")
+          (n == 1 ? "1 of them is" : "\(n) of them are") + " in iCloud Drive (for example a synced Desktop or Documents): your other devices lose this copy too.")
     }
-    func dupTrashed(_ n: Int, _ bytes: Int64) -> String { s("已把 \(n) 个文件（\(Bytes.text(bytes))）移到废纸篓。", "Moved \(n) files (\(Bytes.text(bytes))) to the Trash.") }
+    func dupTrashed(_ n: Int, _ bytes: Int64) -> String { s("已把 \(n) 个文件（\(Bytes.text(bytes))）移到废纸篓。", "Moved \(self.n(n, "file", "files")) (\(Bytes.text(bytes))) to the Trash.") }
     func dupSkipped(_ k: DuplicateFinder.Skipped) -> String? {
         var parts: [String] = []
-        if k.notDownloaded > 0 { parts.append(s("\(k.notDownloaded) 个还没下载到这台 Mac 的 iCloud 文件", "\(k.notDownloaded) iCloud files not downloaded to this Mac")) }
-        if k.unreadable > 0 { parts.append(s("\(k.unreadable) 个无法读取的项目", "\(k.unreadable) items that could not be read")) }
+        if k.notDownloaded > 0 { parts.append(s("\(k.notDownloaded) 个还没下载到这台 Mac 的 iCloud 文件", n(k.notDownloaded, "iCloud file", "iCloud files") + " not downloaded to this Mac")) }
+        if k.unreadable > 0 { parts.append(s("\(k.unreadable) 个无法读取的项目", n(k.unreadable, "item", "items") + " that could not be read")) }
         guard !parts.isEmpty else { return nil }
         return s("跳过了 ", "Skipped ") + parts.joined(separator: s("、", ", ")) + s("。", ".")
     }
