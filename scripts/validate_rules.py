@@ -84,9 +84,19 @@ SECRET_ENV = re.compile(r"TOKEN|KEY|SECRET|PASSWORD|CREDENTIAL")
 ENV_DEFAULTS = {"XDG_CACHE_HOME": "~/.cache", "XDG_CONFIG_HOME": "~/.config", "XDG_DATA_HOME": "~/.local/share",
                 "XDG_STATE_HOME": "~/.local/state", "HF_HOME": "~/.cache/huggingface", "TORCH_HOME": "~/.cache/torch"}
 
-# official_cleanup.command: one known tool, then plain words, flags or <placeholders>, single spaces only.
-KNOWN_TOOLS = {"brew", "conda", "docker", "hf", "mamba", "micromamba", "npm", "ollama", "pip", "pip3", "pnpm",
-               "uv", "xcrun", "yarn"}
+# official_cleanup.command: a known tool and one of its cleanup subcommands, then plain words, flags or
+# <placeholders>, single spaces only. The subcommand matters: the same tools can also install, run downloaded code
+# (npm exec, pnpm dlx) or uninstall, and the app shows this command under "the app's own cleanup command".
+ALLOWED_COMMANDS = {
+    "brew": [["cleanup"]],
+    "conda": [["clean"]], "mamba": [["clean"]], "micromamba": [["clean"]],
+    "hf": [["cache", "rm"], ["cache", "prune"]],
+    "npm": [["cache", "clean"]], "pnpm": [["store", "prune"]], "yarn": [["cache", "clean"]],
+    "ollama": [["rm"]],
+    "pip": [["cache", "purge"], ["cache", "remove"]], "pip3": [["cache", "purge"], ["cache", "remove"]],
+    "uv": [["cache", "clean"], ["cache", "prune"]],
+    "xcrun": [["simctl", "delete", "unavailable"]],
+}
 COMMAND_TOKEN = re.compile(r"[A-Za-z0-9][A-Za-z0-9._=-]*|--?[A-Za-z0-9][A-Za-z0-9-]*|<[a-z][a-z-]*>")
 
 
@@ -126,8 +136,11 @@ def command_problems(cmd):
     tokens = cmd.split(" ")
     if not all(COMMAND_TOKEN.fullmatch(t) for t in tokens):
         return ["must be plain words, flags or <placeholders> separated by single spaces (no quotes, paths, pipes)"]
-    if tokens[0] not in KNOWN_TOOLS:
-        return [f"must start with a known tool ({', '.join(sorted(KNOWN_TOOLS))})"]
+    if tokens[0] not in ALLOWED_COMMANDS:
+        return [f"must start with a known tool ({', '.join(sorted(ALLOWED_COMMANDS))})"]
+    if not any(tokens[1:1 + len(sub)] == sub for sub in ALLOWED_COMMANDS[tokens[0]]):
+        allowed = ", ".join(" ".join([tokens[0], *sub]) for sub in ALLOWED_COMMANDS[tokens[0]])
+        return [f"must be one of the allowed cleanup commands for {tokens[0]} ({allowed})"]
     return []
 
 
@@ -227,6 +240,13 @@ def main() -> int:
         if isinstance(cleanup, dict) and isinstance(cleanup.get("command"), str) and cleanup["command"]:
             for msg in command_problems(cleanup["command"]):
                 problems.append(f"{f.name}: official_cleanup command {msg}")
+
+        for field in ("title", "explain"):
+            texts = rule.get(field)
+            for lang, text in (texts.items() if isinstance(texts, dict) else []):
+                if isinstance(text, str) and "`" in text:
+                    problems.append(f"{f.name}: {field}.{lang} contains a backtick; the app shows it as plain text, "
+                                    "so write commands without backticks")
 
         for ev in as_list(rule.get("evidence")):
             checked = ev.get("checked") if isinstance(ev, dict) else None

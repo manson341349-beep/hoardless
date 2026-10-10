@@ -7,15 +7,19 @@
     "zh": "ModelScope 魔搭模型"
   },
   "explain": {
-    "en": "Models and datasets downloaded from ModelScope. They are downloaded again when a program needs them. Your ModelScope login is kept elsewhere and is not affected.",
-    "zh": "从魔搭 ModelScope 下载的模型和数据集。程序需要时会重新下载。魔搭的登录信息存在别处，不受影响。"
+    "en": "Models and datasets downloaded from ModelScope. They are downloaded again when a program needs them. Other things ModelScope keeps nearby (saved ms-swift training settings, skills) and your login are not included.",
+    "zh": "从魔搭 ModelScope 下载的模型和数据集。程序需要时会重新下载。旁边存的其他东西（ms-swift 保存的训练设置、技能）和你的登录信息都不包括在内。"
   },
   "paths": [
-    "~/.cache/modelscope"
+    "~/.cache/modelscope/models",
+    "~/.cache/modelscope/datasets",
+    "~/.cache/modelscope/hub/models",
+    "~/.cache/modelscope/hub/datasets"
   ],
   "env_overrides": [
     {
-      "var": "MODELSCOPE_CACHE"
+      "var": "MODELSCOPE_CACHE",
+      "subpath": "models"
     }
   ],
   "safety": "review",
@@ -37,5 +41,5 @@
       "checked": "2026-10-10"
     }
   ],
-  "notes": "The whole ~/.cache/modelscope is the cache root: older SDKs write hub/, newer ones (modelscope-hub 0.4.6) models/ and datasets/. Credentials are in ~/.modelscope/credentials and downloaded skills in ~/.agents/skills (modelscope_hub/constants.py), both outside this rule. Not present on the maintainer's Mac."
+  "notes": "Only the download folders: models/ and datasets/ under the cache root (modelscope-hub 0.4.6: {cache}/{type}s/...) and under hub/ (older SDKs: get_model_cache_root = <cache>/hub/models). The rest of ~/.cache/modelscope is left out on purpose: hub/swift-web-ui holds ms-swift Web-UI training settings the user saved, and skills/ (modelscope download --type skill without --local-dir) can hold unpublished skills. Credentials are in ~/.modelscope/credentials. Older flat layouts (hub/<owner>/<name>) are not covered. MODELSCOPE_CACHE is read-only like every override. Not present on the maintainer's Mac."
 }

@@ -80,12 +80,19 @@ CASES = [
     ("path in flag", cmd("hf cache rm --cache-dir=/Users"), 1, "plain words"),
     ("quoted sudo", cmd("'sudo' conda clean --all"), 1, "plain words"),
     ("command_only without command", [rule(paths=["~/.foo/cache"], command_only=True)], 1, "official_cleanup"),
+    ("fetch and run with pnpm", cmd("pnpm dlx some-package"), 1, "allowed cleanup"),
+    ("fetch and run with npm", cmd("npm exec --yes some-package"), 1, "allowed cleanup"),
+    ("install with pip", cmd("pip install some-package"), 1, "allowed cleanup"),
+    ("docker volumes", cmd("docker system prune --all --volumes --force"), 1, "known tool"),
+    ("brew uninstall", cmd("brew uninstall --zap --force <cask>"), 1, "allowed cleanup"),
+    ("tool name only", cmd("brew"), 1, "allowed cleanup"),
     # evidence and text
     ("verified without evidence", p("~/.foo/cache", evidence=[]), 1, "should be non-empty"),
     ("bare https", p("~/.foo/cache", evidence=[{"type": "official_doc", "url": "https://", "checked": "2026-10-08"}]), 1, "does not match"),
     ("impossible date", p("~/.foo/cache", evidence=[{"type": "official_doc", "url": "https://example.com/d", "checked": "2026-02-30"}]), 1, "not a real date"),
     ("future date", p("~/.foo/cache", evidence=[{"type": "official_doc", "url": "https://example.com/d", "checked": "2099-01-01"}]), 1, "in the future"),
     ("whitespace title", p("~/.foo/cache", title={"en": " ", "zh": " "}), 1, "does not match"),
+    ("backticks shown as text", p("~/.foo/cache", explain={"en": "Run `x clean`.", "zh": "运行 `x clean`。"}), 1, "backtick"),
     # file handling
     ("duplicate key", '{"id": "a", "paths": ["~/Movies"], "paths": ["~/.foo/cache"]}', 1, "duplicate key"),
     ("not an object", "[]", 1, "is not of type 'object'"),
@@ -103,6 +110,8 @@ CASES = [
     ("sibling names", [rule("a", paths=["~/.cache/uv"]), rule("b", paths=["~/.cache/uvx"])], 0, "0 problem(s)"),
     ("container documents", p("~/Library/Containers/com.x/Data/Documents/Models"), 0, "0 problem(s)"),
     ("tool command", cmd("ollama rm <model>"), 0, "0 problem(s)"),
+    ("brew cleanup", cmd("brew cleanup --prune all"), 0, "0 problem(s)"),
+    ("npm cache clean", cmd("npm cache clean --force"), 0, "0 problem(s)"),
 ]
 
 

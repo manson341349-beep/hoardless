@@ -7,8 +7,8 @@
     "zh": "Homebrew 下载缓存"
   },
   "explain": {
-    "en": "Installers Homebrew has downloaded, plus its cached package index. Installed programs keep working; Homebrew downloads again what it needs next time.",
-    "zh": "Homebrew 下载过的安装包和缓存的软件列表。已经装好的程序照常能用，下次安装或升级时 Homebrew 会重新下载需要的部分。"
+    "en": "Installers Homebrew has downloaded, plus its cached package index. Moving this folder only removes downloads: installed programs keep working, and Homebrew downloads again what it needs next time. The brew command shown below does more: it also uninstalls old versions of installed programs and dependencies nothing needs any more. Add --dry-run to see what it would remove first.",
+    "zh": "Homebrew 下载过的安装包和缓存的软件列表。挪走这个文件夹只是删掉下载的东西：装好的程序照常能用，下次需要时 Homebrew 会重新下载。下面那条 brew 命令做得更多：还会卸掉已装程序的旧版本和不再需要的依赖，可以先加 --dry-run 看看它会删什么。"
   },
   "paths": [
     "~/Library/Caches/Homebrew"

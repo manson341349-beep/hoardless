@@ -7,8 +7,8 @@
     "zh": "Playwright 浏览器"
   },
   "explain": {
-    "en": "Browsers Playwright downloaded for automated tests and AI agents. Tests that use them stop working until you run `npx playwright install` again.",
-    "zh": "Playwright 为自动化测试和 AI 智能体下载的浏览器。挪走后，用到它们的测试要重新运行 `npx playwright install` 才能再用。"
+    "en": "Browsers Playwright downloaded for automated tests, and the browser profiles AI agents use through it (Playwright MCP, playwright-cli), which can hold their logins to websites. Shown only: to remove the browsers, use Playwright's own uninstall command in Terminal.",
+    "zh": "Playwright 为自动化测试下载的浏览器，以及 AI 智能体通过它使用的浏览器资料（Playwright MCP、playwright-cli），里面可能有它们登录各网站的记录。这里只显示大小；要删浏览器，请在终端用 Playwright 自带的卸载命令。"
   },
   "paths": [
     "~/Library/Caches/ms-playwright"
@@ -18,7 +18,7 @@
       "var": "PLAYWRIGHT_BROWSERS_PATH"
     }
   ],
-  "safety": "review",
+  "safety": "protected",
   "status": "verified",
   "evidence": [
     {
@@ -30,7 +30,12 @@
       "type": "local_observation",
       "note": "Present on the maintainer's Mac: 1.0G (chromium-1208, chromium_headless_shell-1208, firefox-1509, webkit-2248, ffmpeg-1011). macOS 26.6.2.",
       "checked": "2026-10-10"
+    },
+    {
+      "type": "official_source_code",
+      "url": "https://raw.githubusercontent.com/microsoft/playwright/v1.60.0/packages/playwright-core/src/tools/mcp/browserFactory.ts",
+      "checked": "2026-10-10"
     }
   ],
-  "notes": "PLAYWRIGHT_BROWSERS_PATH=0 keeps browsers inside each project's node_modules; those are not scanned. Playwright's own uninstall command is `npx playwright uninstall --all`; it is not offered as official_cleanup because npx can fetch and run any package."
+  "notes": "Protected since 2026-10-10: Playwright MCP keeps persistent browser profiles (with logins) in mcp-<browser>-<hash> inside this folder (createUserDataDir in browserFactory.ts, v1.60.0), and playwright-cli in daemon/. The browser folders themselves (chromium-1208 etc.) change name with every version, so the rule cannot point at just them. PLAYWRIGHT_BROWSERS_PATH=0 keeps browsers inside each project's node_modules; those are not scanned. Playwright's own uninstall command is `npx playwright uninstall --all`; it is not offered as official_cleanup because npx can fetch and run any package."
 }

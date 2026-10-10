@@ -7,8 +7,8 @@
     "zh": "Ollama 本地模型"
   },
   "explain": {
-    "en": "Models downloaded in the Ollama app or with `ollama pull`. Models you built yourself with `ollama create` may be your only copy, so Hoardless only shows the size. Remove models one by one with Ollama's own command.",
-    "zh": "在 Ollama 里下载的模型（App 里点的或用 `ollama pull` 拉的）。你自己用 `ollama create` 做的模型可能只有这一份，所以这里只显示大小。要删请用 Ollama 自带的命令逐个删除。"
+    "en": "Models downloaded in the Ollama app or with ollama pull. Models you built yourself with ollama create may be your only copy, so Hoardless only shows the size. Remove models one by one with Ollama's own command.",
+    "zh": "在 Ollama 里下载的模型（App 里点的或用 ollama pull 拉的）。你自己用 ollama create 做的模型可能只有这一份，所以这里只显示大小。要删请用 Ollama 自带的命令逐个删除。"
   },
   "paths": [
     "~/.ollama/models"

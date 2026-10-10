@@ -76,7 +76,7 @@ RAM "boosters", system-folder "junk", app uninstalling (for now), browser/privac
 | 剪映专业版 (JianyingPro) | JianyingPro rebuildable cache / 剪映专业版可重建的缓存 | review · 要重新下载 |
 | 剪映专业版 (JianyingPro) | JianyingPro drafts / 剪映专业版草稿 | protected · 只看 |
 | Docker Desktop | Docker Desktop disk / Docker Desktop 虚拟磁盘 | protected · 只看 |
-| Playwright | Playwright browsers / Playwright 浏览器 | review · 要重新下载 |
+| Playwright | Playwright browsers / Playwright 浏览器 | protected · 只看 |
 
 Nothing is ever pre-selected. / 任何项目都不会默认勾选。
 

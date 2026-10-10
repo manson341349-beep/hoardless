@@ -107,6 +107,9 @@ and pip. They are shown read-only: Hoardless only trashes or moves a rule's own 
   DaVinci Resolve 的缓存位置跟着每个项目的设置走，没有固定路径，所以暂时没有规则。
 - conda's main package cache usually sits outside the home folder (e.g. `/opt/anaconda3/pkgs`), which rules cannot point to.
   conda 的主包缓存通常在用户目录外（如 `/opt/anaconda3/pkgs`），规则目前不能指向那里。
+- Environment variables set in a shell profile (`~/.zshrc` and the like) are not seen by an app opened from the Finder,
+  so an `env_overrides` location set only there is not shown; the rule's default paths still are.
+  只写在终端配置文件（如 `~/.zshrc`）里的环境变量，从访达打开的 App 看不到，所以这种自定义位置不会显示；规则的默认位置照常显示。
 - Shown sizes can be larger than the space actually freed: files hard-linked into environments (conda, uv) are counted
   twice, and Docker.raw's apparent size is larger than what it uses on disk.
   显示的大小可能比实际能腾出的空间大：conda、uv 的文件和环境共用，Docker.raw 显示的大小也比实际占用大。
