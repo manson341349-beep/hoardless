@@ -1,4 +1,5 @@
 import Foundation
+import HoardlessRules
 
 /// One rule file from rules/apps: where one app keeps one kind of data. See docs/RULES.md.
 public struct Rule: Decodable, Identifiable, Sendable {
@@ -67,7 +68,7 @@ public enum RuleLoader {
     /// The rules shipped with the app: Contents/Resources/rules in a built .app, otherwise the package resource.
     public static func bundledRulesDirectory() -> URL? {
         if let url = Bundle.main.url(forResource: "rules", withExtension: nil) { return url }
-        return Bundle.module.url(forResource: "rules", withExtension: nil)
+        return BundledRules.directory
     }
 
     /// Loads every *.json rule in `directory`. Unverified rules are left out unless asked for.
