@@ -27,8 +27,10 @@ if [ "$INSTALL" = 1 ] && [ -e "$DEST" ]; then
     fi
 fi
 
-swift build -c release --product Hoardless
-BIN="$(swift build -c release --show-bin-path)"
+# One app for both Apple silicon and Intel Macs.
+ARCHS=(--arch arm64 --arch x86_64)
+swift build -c release --product Hoardless "${ARCHS[@]}"
+BIN="$(swift build -c release "${ARCHS[@]}" --show-bin-path)"
 APP="build/Hoardless.app"
 
 rm -rf "$APP"

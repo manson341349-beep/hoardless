@@ -1,0 +1,35 @@
+name: Bug report / 报告问题
+description: Something does not work or looks wrong. / 有东西不能用或显示不对。
+labels: [bug]
+body:
+  - type: markdown
+    attributes:
+      value: |
+        If Hoardless moved, trashed or offered something it should not have, please report it privately instead (see SECURITY.md).
+        如果 Hoardless 挪走、丢掉或允许勾选了不该动的东西，请改为私下报告（见 SECURITY.md）。
+  - type: textarea
+    id: what
+    attributes:
+      label: What happened / 发生了什么
+      description: What you clicked, what you expected, what you saw. / 你点了什么，期望看到什么，实际看到什么。
+    validations:
+      required: true
+  - type: input
+    id: version
+    attributes:
+      label: Hoardless version / Hoardless 版本
+      description: Settings → About / 设置 → 关于
+    validations:
+      required: true
+  - type: input
+    id: macos
+    attributes:
+      label: macOS version and chip / macOS 版本和芯片
+      placeholder: macOS 15.3, Apple M2 / Intel
+    validations:
+      required: true
+  - type: textarea
+    id: extra
+    attributes:
+      label: Screenshots or anything else / 截图或其他信息
+      description: Please blur personal file names if needed. / 如有需要，请把私人文件名打码。

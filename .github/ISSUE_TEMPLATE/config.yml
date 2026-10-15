@@ -1,0 +1,5 @@
+blank_issues_enabled: true
+contact_links:
+  - name: Report something unsafe privately / 私下报告安全问题
+    url: https://github.com/manson341349-beep/hoardless/security/advisories/new
+    about: Hoardless moved, trashed or offered something it should not have. / Hoardless 挪走、丢掉或允许勾选了不该动的东西。

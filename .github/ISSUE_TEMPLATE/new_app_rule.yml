@@ -1,0 +1,29 @@
+name: New app rule / 请求收录新应用
+description: An app that fills your disk and Hoardless does not know yet. / 一个很占空间、但 Hoardless 还不认识的应用。
+labels: [rule]
+body:
+  - type: input
+    id: app
+    attributes:
+      label: App / 应用
+    validations:
+      required: true
+  - type: textarea
+    id: where
+    attributes:
+      label: Where it keeps its data / 它的数据放在哪里
+      description: Folder paths (starting with ~/), roughly how big, and what is inside. / 文件夹路径（以 ~/ 开头）、大概多大、里面是什么。
+    validations:
+      required: true
+  - type: textarea
+    id: safe
+    attributes:
+      label: What happens if it goes / 删掉会怎样
+      description: Does the app download or rebuild it? Could anything you made be in there? / 应用会重新下载或重建吗？里面会不会有你自己做的东西？
+    validations:
+      required: true
+  - type: textarea
+    id: evidence
+    attributes:
+      label: Sources / 依据
+      description: Official docs, source code, or what you saw on your own Mac (with the date). / 官方文档、源码，或你在自己 Mac 上看到的情况（附日期）。
